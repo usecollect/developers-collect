@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collect API Documentation</title>
+  <meta name="description" content="Developer documentation for the Collect REST API. Send and receive data from your Collect account." />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
+  <style>
+    /* ── Theme: Dark mode ── */
+    .dark-mode,
+    .scalar-app.dark-mode {
+      --scalar-color-accent: #4f8ff7;
+      --scalar-background-accent: #4f8ff710;
+      --scalar-sidebar-background-1: #0f1117;
+      --scalar-sidebar-color-1: #ffffffcc;
+      --scalar-sidebar-color-2: #ffffff80;
+      --scalar-sidebar-color-active: #ffffff;
+      --scalar-sidebar-item-hover-background: #ffffff10;
+      --scalar-sidebar-item-active-background: #4f8ff720;
+      --scalar-sidebar-search-background: #ffffff08;
+      --scalar-sidebar-search-border-color: #ffffff15;
+      --scalar-sidebar-search-color: #ffffffaa;
+      --scalar-sidebar-border-color: #ffffff10;
+      --scalar-background-1: #13151a;
+      --scalar-background-2: #1a1d25;
+      --scalar-background-3: #22252f;
+      --scalar-color-1: #ffffffee;
+      --scalar-color-2: #ffffffaa;
+      --scalar-color-3: #ffffff66;
+      --scalar-border-color: #ffffff12;
+    }
+
+    /* ── Theme: Light mode ── */
+    .light-mode,
+    .scalar-app.light-mode {
+      --scalar-color-accent: #2563eb;
+      --scalar-background-accent: #2563eb08;
+      --scalar-sidebar-background-1: #f8fafc;
+      --scalar-sidebar-color-1: #1e293b;
+      --scalar-sidebar-color-2: #64748b;
+      --scalar-sidebar-color-active: #2563eb;
+      --scalar-sidebar-item-hover-background: #f1f5f9;
+      --scalar-sidebar-item-active-background: #2563eb10;
+      --scalar-sidebar-search-background: #ffffff;
+      --scalar-sidebar-search-border-color: #e2e8f0;
+      --scalar-sidebar-border-color: #e2e8f0;
+    }
+
+    /* ── Hide Scalar branding & unwanted UI ── */
+
+    /* Top toolbar (Developer Tools, Share, Generate SDKs, Configure) */
+    .api-reference-toolbar { display: none !important; }
+
+    /* "Open API Client" button in sidebar bottom */
+    .open-api-client-button { display: none !important; }
+
+    /* "Powered by Scalar" link in sidebar footer */
+    .t-doc__sidebar a[href="https://www.scalar.com"] {
+      display: none !important;
+    }
+
+    /* ── Collect logo in sidebar header ── */
+    .collect-logo-link {
+      display: flex;
+      align-items: center;
+      padding: 12px 12px 0;
+      text-decoration: none;
+    }
+    .collect-logo-link img {
+      height: 24px;
+      width: auto;
+    }
+    .light-mode .collect-logo-link img,
+    .scalar-app.light-mode .collect-logo-link img {
+      filter: invert(1);
+    }
+
+    /* ── AI Assistant dropdown ── */
+    .ai-assistant-dropdown {
+      position: relative;
+    }
+    .ai-assistant-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--scalar-sidebar-border-color, #ffffff15);
+      background: var(--scalar-sidebar-search-background, #ffffff08);
+      color: var(--scalar-sidebar-color-2, #ffffff80);
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: var(--scalar-font, inherit);
+    }
+    .ai-assistant-btn:hover {
+      color: var(--scalar-sidebar-color-1, #ffffffcc);
+      border-color: var(--scalar-sidebar-color-2, #ffffff80);
+    }
+    .ai-assistant-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .ai-dropdown-menu {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--scalar-background-2, #1a1d25);
+      border: 1px solid var(--scalar-border-color, #ffffff12);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+    .ai-dropdown-menu.open {
+      display: block;
+    }
+    .ai-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      color: var(--scalar-color-2, #ffffffaa);
+      font-size: 13px;
+      transition: background 0.15s, color 0.15s;
+      font-family: var(--scalar-font, inherit);
+    }
+    .ai-dropdown-item:hover {
+      background: var(--scalar-background-3, #22252f);
+      color: var(--scalar-color-1, #ffffffee);
+    }
+    .ai-dropdown-item img {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+    }
+    .ai-dropdown-item span {
+      flex: 1;
+    }
+    .ai-dropdown-item .ai-arrow {
+      opacity: 0;
+      transition: opacity 0.15s;
+      color: var(--scalar-color-3, #ffffff66);
+    }
+    .ai-dropdown-item:hover .ai-arrow {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  <script>
+    Scalar.createApiReference('#app', {
+      url: '/openapi.yaml',
+      darkMode: true,
+      showSidebar: true,
+      hideModels: true,
+      hideDownloadButton: false,
+      hideClientButton: true,
+      favicon: '/favicon.png',
+      metaData: {
+        title: 'Collect API Documentation',
+        description: 'Developer documentation for the Collect REST API. Send and receive data from your Collect account.',
+      },
+      authentication: {
+        preferredSecurityScheme: 'basicAuth',
+      },
+    })
+
+    // Build the AI prompt with full API context
+    const aiPrompt = `I'm working with the Collect API (https://api.usecollect.com/v1). It uses HTTP Basic Auth with an API key. The API has these resources: Teams, Users, Campaigns, Requests (with messages, contributors, document sync, PDF export), Elements (documents, forms, e-signatures), Contacts, and Webhooks. Help me integrate with this API.`
+    const encodedPrompt = encodeURIComponent(aiPrompt)
+
+    const aiTargets = [
+      {
+        name: 'ChatGPT',
+        url: `https://chat.openai.com/?q=${encodedPrompt}`,
+        icon: `data:image/svg+xml,${encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>')}`,
+      },
+      {
+        name: 'Claude',
+        url: `https://claude.ai/new?q=${encodedPrompt}`,
+        icon: `data:image/svg+xml,${encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>')}`,
+      },
+      {
+        name: 'Gemini',
+        url: `https://gemini.google.com/app?q=${encodedPrompt}`,
+        icon: `data:image/svg+xml,${encodeURIComponent('<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="white" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>')}`,
+      },
+    ]
+
+    function injectCustomUI() {
+      const sidebar = document.querySelector('.t-doc__sidebar')
+      if (!sidebar) {
+        requestAnimationFrame(injectCustomUI)
+        return
+      }
+
+      // 1. Inject Collect logo link at the top of the sidebar
+      const logoLink = document.createElement('a')
+      logoLink.href = 'https://www.usecollect.com'
+      logoLink.target = '_blank'
+      logoLink.rel = 'noopener noreferrer'
+      logoLink.className = 'collect-logo-link'
+      logoLink.innerHTML = '<img src="/logo-collect-white.svg" alt="Collect" />'
+      sidebar.insertBefore(logoLink, sidebar.firstChild)
+
+      // 2. Hide the original "Ask AI" button
+      const allButtons = [...sidebar.querySelectorAll('button')]
+      const askAiBtn = allButtons.find(b => b.textContent.includes('Ask AI'))
+      if (askAiBtn) askAiBtn.style.display = 'none'
+
+      // 3. Inject AI assistant dropdown in the sidebar footer area
+      const sidebarFooter = sidebar.querySelector('.flex.flex-col.gap-3')
+      if (sidebarFooter) {
+        const dropdown = document.createElement('div')
+        dropdown.className = 'ai-assistant-dropdown'
+        dropdown.innerHTML = `
+          <button class="ai-assistant-btn" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+            Ask AI about this API
+          </button>
+          <div class="ai-dropdown-menu">
+            ${aiTargets.map(t => `
+              <a class="ai-dropdown-item" href="${t.url}" target="_blank" rel="noopener noreferrer">
+                <img src="${t.icon}" alt="${t.name}" />
+                <span>Ask ${t.name}</span>
+                <span class="ai-arrow">&nearr;</span>
+              </a>
+            `).join('')}
+          </div>
+        `
+        sidebarFooter.insertBefore(dropdown, sidebarFooter.firstChild)
+
+        // Toggle dropdown
+        const btn = dropdown.querySelector('.ai-assistant-btn')
+        const menu = dropdown.querySelector('.ai-dropdown-menu')
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation()
+          menu.classList.toggle('open')
+        })
+        document.addEventListener('click', () => menu.classList.remove('open'))
+      }
+    }
+
+    // Wait for Scalar to render, then inject
+    setTimeout(injectCustomUI, 500)
+  </script>
+</body>
+</html>

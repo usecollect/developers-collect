@@ -1,0 +1,3990 @@
+openapi: 3.0.1
+x-stoplight:
+  id: 12dab89109ded
+info:
+  title: Collect API
+  version: '1.0'
+  description: |
+    Welcome to Collect Developer documentation. 
+    
+    The Collect REST API is a collection of HTTPS endpoints to enable any application that supports HTTPS requests to send and receive data from a Collect account.
+servers:
+  - url: 'https://api.usecollect.com/v1'
+    description: Production server.
+security:
+  - basicAuth: []
+tags:
+  - name: Teams
+  - name: Users
+  - name: Campaigns
+  - name: Requests
+  - name: Elements
+  - name: Contacts
+  - name: Webhooks
+    description: |
+      You can configure webhook endpoints via the API to be notified about events that happen in your Collect account.
+      
+      **Notes:**
+      
+      Collect attempts to deliver your webhooks for 24 hours with an exponential back off. After this timing, your webhook will automatically be paused.
+paths:
+  /team:
+    get:
+      tags:
+        - Teams
+      operationId: get-team-information
+      summary: Get Team Information
+      description: This endpoint retrieves information of your team.
+      responses:
+        '200':
+          description: Information of your team.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /users:
+    get:
+      tags:
+        - Users
+      operationId: list-all-users
+      summary: List all users
+      description: This endpoint retrieves all the users in your team.
+      responses:
+        '200':
+          description: List of users in your team.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+              example: 
+                - _id: upKywNKgwyHx3hKfF
+                  role: admin
+                  status: active
+                  email: richard.hendricks@example.com
+                  firstName: Richard
+                  lastName: Hendricks
+                - _id: ABx6DYtqExcgJ4FAX
+                  role: member
+                  status: active
+                  email: erlich.bachman@example.com
+                  firstName: Erlich
+                  lastName: Bachman
+                - _id: uSw8YyNuwhGmqEEKc
+                  role: member
+                  status: active
+                  email: dinesh.chugtai@example.com
+                  firstName: Dinesh
+                  lastName: Chugtai
+                - _id: RQEPygugi3Nk9Sudm
+                  role: member
+                  status: active
+                  email: gilfoyle@example.com
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /user:
+    get:
+      tags:
+        - Users
+      operationId: get-a-specific-user
+      summary: Get a specific user
+      description: This endpoint retrieves a specific user in your team. You can search by user ID or by email.
+      parameters:
+        - name: id
+          in: query
+          description: Use this parameter if you want to search by user ID.
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: Use this parameter if you want to search a user by email.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A specific user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                _id: upKywNKgwyHx3hKfF
+                role: admin
+                status: active
+                email: richard.hendricks@example.com
+                firstName: Richard
+                lastName: Hendricks
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /campaigns:
+    get:
+      tags:
+        - Campaigns
+      operationId: list-all-campaigns
+      summary: List all campaigns
+      description: This endpoint retrieves all the campaigns.
+      parameters:
+        - name: offset
+          in: query
+          description: Specify the ranking number of the first item on the page. Used for pagination.
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: 'Specify how many results to return. Default is 50 campaigns, maximum is 100 campaigns.'
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: showArchives
+          in: query
+          description: Specify if the archived campaigns should be included or not. Default is false.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: List of campaigns.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campaign'
+              example:
+                - _id: mYCsdgB4DQoENBaX6
+                  name: Pied Piper Beta
+                  createdAt: 2024-11-22T13:28:08.215Z
+                  status: open
+                  count:
+                    request: 72
+                    open: 4
+                    done: 61
+                    due: 5
+                    waiting: 2
+                    error: 0
+                    message: 0
+                - _id: wFndw23xmx5RdWrFX
+                  name: Hooli Security Audit
+                  createdAt: 2024-12-15T09:49:25.621Z
+                  status: open
+                  count: 
+                    request: 22
+                    open: 4
+                    done: 18
+                    due: 0
+                    waiting: 0
+                    error: 0
+                    message: 0
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/campaigns/{campaignId}':
+    get:
+      tags:
+        - Campaigns
+      operationId: get-specific-campaign
+      summary: Get a specific campaign
+      description: Retrieve all the details of a specific campaign.
+      parameters:
+        - name: campaignId
+          in: path
+          description: The ID of the campaign to retrieve.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Campaign details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignDetails'
+              example:
+                _id: DP7Sj7stsmXbKCKbK
+                createdAt: 2024-12-22T14:24:29.076Z
+                status: open
+                documents: 
+                  - id: Gwm5sHv6tzikK65We
+                    name: ID
+                    order: 0,
+                    mandatory: false
+                    multipleupload: true
+                  - id: 4PQd5HKQcBk5BZmsB
+                    name: Bank statement
+                    order: 1,
+                    mandatory: true
+                    extensions: [pdf]
+                    multipleupload: true    
+                forms:     
+                  - id: sDmmcMFRRbnizYsQp
+                    name: Client contacts
+                    order: 3
+                    items: 
+                      - id: 6878fzc9KPi9ZkMPG
+                        name: First Name
+                        type: shortText
+                      - id: sAEPkpyYr7SRisJWv
+                        name: Last Name
+                        type: shortText
+                      - id: F3ov9Qnr2zPJNKkL8
+                        name: Business Industry
+                        type: multi
+                texts:         
+                  - id: 2qcE5ibXgdkjvpkp2
+                    name: Text block
+                    order: 4
+                pages: 
+                  - id: DCd4FDZ5EBN2pgWmj
+                    name: Details
+                    order: 2
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /requests:
+    get:
+      tags:
+        - Requests
+      operationId: list-all-the-requests-of-a-campaign
+      summary: List all the requests of a campaign
+      description: This endpoint retrieves all the requests of a campaign.
+      parameters:
+        - name: campaignId
+          in: query
+          required: true
+          description: Specify the ID of the campaign to retrieve.
+          schema:
+            type: string
+          example: mYCsdgB4DQoENBaX6
+        - name: offset
+          in: query
+          description: Specify the ranking number of the first item on the page. Used for pagination.
+          schema:
+            type: integer
+          example: 0
+        - name: limit
+          in: query
+          description: 'Specify how many results to return. Default is 50 campaigns, maximum is 100 campaigns.'
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+          example: 25
+        - name: filter
+          in: query
+          description: | 
+            Filter requests by status. If not specify, will return all the requests except request cancelled, archived and the drafts.
+            Below you will find the data dictionary for the status attribute.
+            
+            | Status | Description |
+            | ------ | ----------- |
+            | pending | The request has been sent and is not completed. |
+            | completed | The request has been sent, all the documents have been uploaded and the forms submitted. If validation is opted-in, the documents and data have been validated too. |
+            | due | The request has been sent, is not completed and is due. |
+            | waiting | The request has been sent, all the documents have been uploaded and the forms submitted but they have not been validated by the user. |
+            | archived | The request has been archived. |
+            | cancelled | The request has been cancelled. |
+            | error | An error happened when we sent the request. |
+
+            > info
+            > You can also use custom status here.
+            
+          schema:
+            type: string
+          example: pending
+        - name: search
+          in: query
+          description: | 
+            String to look up. We will search into the contact first name, contact last name, contact email and all the custom data.
+          schema:
+            type: string
+          example: pending
+      responses:
+        '200':
+          description: List of requests of a campaigns.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CampaignRequest'
+              example:
+                - _id: NxAHPWu9hRzcyD24m
+                  campaignId: mYCsdgB4DQoENBaX6
+                  createdAt: 2024-05-22T13:40:26.671Z
+                  portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/NxAHPWu9hRzcyD24m/c/NxAHPWu9hRzcyD24m
+                  status: due
+                  dueDate: 2024-06-12T22:59:00.000Z
+                  privacy: team
+                  contact:
+                    _id: uBJadNFcjrC6emRom
+                    email: erlich.bachman@example.com
+                    firstName: Erlich
+                    lastName: Bachman
+                    company: Bachmanity
+                    nbRequest: 11
+                    tag: []
+                    custom:
+                      - _id: yw6XDyeFvbqr86yA6
+                        name: Favorite color
+                        variable: color
+                        value: Blue
+                      - _id: CqdFwGX3yitk9zf8z
+                        name: Country
+                        variable: country
+                        value: US
+                    createdAt: 2024-11-22T13:40:26.591Z
+                    lastActivity: 2024-06-17T17:14:52.498Z
+                  branding:
+                    useBranding: true
+                    brandingId: jSEj7vHk3wLG3gRF7
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      tags:
+        - Requests
+      operationId: send-multiple-requests
+      summary: send multiple requests
+      description: This endpoint allows you to send multiple requests to new contacts or existing contacts.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignId:
+                  type: string
+                  description: The ID of the campaign you want to send a request.
+                contacts:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContactMultipleRequest'
+                  description: | 
+                    An array of the contacts you want to send the request to. You can send requests up to 50 contacts per API call (considering your account's limitation). Each contact can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact))
+                items:
+                  description: ' An array of itemId. If you want to request only few items (documents and forms) of the campaign, you can optionaly specify which items you want to retrieve.'
+                  type: array
+                  items:
+                    type: string
+                samples:
+                  description: 'An array of object. Each object represents the sample of a document element. The object must contain 2 parameters: ''itemId'' and ''url''.'
+                  type: object
+                  properties:
+                    itemId:
+                      type: string
+                    url:
+                      type: string
+                dueDate:
+                  description: 'The due date of the request. The due date should be encoded as a string using ISO 8601 format.'
+                  type: string
+                assignedTo:
+                  description: 'The ID of the team member you want to assign the request to. You can also use the email address of the team member.'
+                  type: string
+                sendMessage:
+                  description: 'Boolean. If set to false, the sequence of messages planned in your campaign will not be sent.'
+                  type: boolean
+                sendCompletionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "completed". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendRejectionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending" and at least one element on the portal has been rejected. This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendReopenMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+              required:
+                - campaignId
+                - contacts
+            example: 
+              campaignId: xvr69EYLKXvTkfYuk
+              contacts: 
+                - WmTjsFknzHdmfs3Ra
+                - email: dinesh.chugtai@example.com
+                  firstName: Dinesh
+                  lastName: Chugtai
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CampaignRequest'
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContactMultipleResponse'
+                  errors:
+                    type: array
+                    items: {}
+              example: 
+                requests: 
+                  - _id: nw42MmBsJoccgutST
+                    campaignId: xvr69EYLKXvTkfYuk
+                    createdAt: 2024-12-04T07:20:06.085Z
+                    portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/nw42MmBsJoccgutST/c/Kx9mN2pQ7vR4wE8s
+                    status: pending
+                    dueDate: 2024-12-11T21:59:00.000Z
+                    privacy: private
+                    contact:
+                      _id: WmTjsFknzHdmfs3Ra
+                      email: richard.hendricks@example.com
+                      firstName: Richard
+                      lastName: Hendricks
+                      nbRequest: 5
+                      createdAt: 2024-12-03T13:51:27.666Z
+                      lastActivity: 2024-12-04T07:20:06.080Z
+                    branding:   
+                      useBranding: false
+                    sendCompletionMessage: true
+                  - _id: jdDzbxP8MnfBdrRuM
+                    campaignId: xvr69EYLKXvTkfYuk
+                    createdAt: 2024-12-04T07:20:06.116Z
+                    portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/jdDzbxP8MnfBdrRuM/c/Ly5nQ8rT3wX6zA9t
+                    status: pending
+                    dueDate: 2024-12-11T21:59:00.000Z
+                    privacy: private
+                    contact:
+                      _id: ngxhLDiDGEBS2jjKh
+                      email: erlich.bachman@example.com
+                      firstName: Erlich
+                      lastName: Bachman
+                      company: Bachmanity
+                      nbRequest: 1
+                      createdAt: 2024-12-04T07:20:06.059Z
+                      lastActivity: 2024-12-04T07:20:06.113Z
+                    branding:
+                      useBranding: false
+                contacts: 
+                  - WmTjsFknzHdmfs3Ra
+                  - _id: ngxhLDiDGEBS2jjKh
+                    email: erlich.bachman@example.com
+                    firstName: Erlich
+                    lastName: Bachman
+                    createdAt: 2024-12-04T07:20:06.059Z
+                errors: []
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}':
+    get:
+      tags:
+        - Requests
+      operationId: get-a-specific-request
+      summary: Get a specific request
+      description: |
+        This endpoint retrieves all the details of a specific request including the answers of the forms and the documents that have been uploaded.
+
+        **Document uploads:** Each document in `documents[].uploads[]` includes `id`, `name`, `createdAt`, and other metadata. When an upload is downloadable, a temporary `url` is provided. When an upload is not downloadable (e.g. archived or expired), it still appears in the list with `status` set to `archived` or `expired` and **no `url` field** — the document cannot be downloaded via the API in those cases. Uploads in quarantine also omit `url`.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request to retrieve.
+          schema:
+            type: string
+        - name: expires
+          in: query
+          description: |
+            Specify the period of validity of the url to access the uploaded documents. Should be an integer, default is `900` (15 minutes) and maximum is `3600` (1 hour).
+          schema:
+            type: integer
+          example:
+            requestId: NxAHPWu9hRzcyD24m
+      responses:
+        '200':
+          description: Specific Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecificRequest'
+              example:
+                _id: NxAHPWu9hRzcyD24m
+                campaignId: mYCsdgB4DQoENBaX6
+                createdAt: 2024-01-22T13:40:26.671Z
+                portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/NxAHPWu9hRzcyD24m/c/NxAHPWu9hRzcyD24m
+                status: due
+                dueDate: 2025-01-29T22:59:00.000Z
+                privacy: team
+                contact:
+                  _id: uBJadNFcjrC6emRom
+                  email: erlich.bachman@example.com
+                  firstName: Erlich
+                  lastName: Bachman
+                  nbRequest: 11
+                  tag: []
+                  custom:
+                    - _id: yw6XDyeFvbqr86yA6
+                      name: Favorite color
+                      variable: color
+                      value: Blue
+                    - _id: CqdFwGX3yitk9zf8z
+                      name: Country
+                      variable: country
+                      value: US
+                  createdAt: 2024-11-22T13:40:26.591Z
+                  lastActivity: 2025-01-24T17:14:52.498Z
+                branding:
+                  useBranding: true
+                  brandingId: jSEj7vHk3wLG3gRF7
+                documents:
+                  - id: dfgZmo7SdijHMkwx5
+                    itemId: gKLyBTL3RyzqTnoHc
+                    name: ID
+                    status: waiting
+                    order: 1
+                    visibility: true
+                    extensions: [pdf]
+                    multipleupload: true
+                    uploads:
+                      - createdAt: 2024-01-23T14:01:31.777Z
+                        name: Erlich's ID.pdf
+                        url: https://collectuseast.s3.amazonaws.com/erlich_id.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=bglKxNBqqcDKkAeuzmxoBS2IOQQ%3D
+                        size: 2414511
+                        scannedOn: 2024-01-23T14:01:51.237Z
+                        virusScanned: true
+                  - id: MnDf76Dmp9LzG32PG
+                    itemId: rpBjtem4kkPnFa3rH
+                    name: Bank statement
+                    status: waiting
+                    order: 2
+                    visibility: true
+                    extensions: [zip, rar, gzip, gz]
+                    multipleupload: true
+                    sample:
+                      name: bank_statement.pdf
+                      url: https://collectsamples.s3.amazonaws.com/bank_statement.pdf
+                    uploads: 
+                      - createdAt: 2024-01-23T15:59:36.975Z
+                        name: bank_statement.zip
+                        size: 42573459
+                        scannedOn: 2024-01-23T15:59:58.147Z
+                        virusScanned: true
+                        quarantine: true
+                forms: 
+                  - id: BWXwpuhhjkoJ4PyBt
+                    itemId: buBLLGP3WczFCrNBh
+                    name: Client contacts
+                    status: completed
+                    order: 0
+                    visibility: true
+                    items: 
+                      - name: First Name
+                        type: shortText
+                        answer: Erlich
+                      - name: Last Name
+                        type: shortText
+                        answer: Bachman
+                      - name: Business industry
+                        type: multi
+                        answer: [Cars, Space]
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /request:
+    post:
+      tags:
+        - Requests
+      operationId: send-a-new-request
+      summary: Send a new request
+      description: This endpoint allows you to send a new request to a new contact or to an existing contact.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignId:
+                  type: string
+                  description: The ID of the campaign you want to use to send a request.
+                contact:
+                  description: |
+                    The contact can be a string representing the ID of an existing contact or a contact object in JSON format ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact)).
+                  $ref: '#/components/schemas/ContactMultipleRequest'
+                items:
+                  description: 'An array of itemId. If you want to request only few elements of the campaign, you can optionaly specify which elements you want to include in your request.'
+                  type: array
+                  items:
+                    type: string
+                esignDocs:
+                  type: array
+                  description: |
+                    Array of documents to be uploaded for e-signature. Each document must be associated with a sign element and can be provided via URL or base64 encoded data.
+                    The file size is limited to 20Mb per document regardless of the upload method chosen.
+                  items:
+                    type: object
+                    required:
+                      - itemId
+                      - name
+                    properties:
+                      itemId:
+                        type: string
+                        description: ID of the sign element you want to upload the document to
+                      name:
+                        type: string
+                        description: Name of the file with the file extension
+                      url:
+                        type: string
+                        description: URL of the remote file to sign
+                      data:
+                        type: string
+                        description: Base64 encoded file
+                    oneOf:
+                      - title: Remote URL
+                        type: object
+                        required: [itemId, name, url]
+                        properties:
+                          itemId:
+                            type: string
+                            description: ID of the sign element you want to upload the document to
+                          name:
+                            type: string
+                            description: Name of the file with the file extension
+                          url:
+                            type: string
+                            description: URL of the remote file to sign
+                      - title: Base64 Data
+                        type: object
+                        required: [itemId, name, data]
+                        properties:
+                          itemId:
+                            type: string
+                            description: ID of the sign element you want to upload the document to
+                          name:
+                            type: string
+                            description: Name of the file with the file extension
+                          data:
+                            type: string
+                            description: Base64 encoded file
+                esignTriggers:
+                  type: array
+                  description: Array of sign element IDs that should be triggered for signature immediately after the request is created
+                  items:
+                    type: string
+                    description: ID of sign element that should be triggered for signature immediately after the request is created
+                data:
+                  description: An object with custom data that you want to use in your request.
+                  type: object
+                sample:
+                  description: 'An object that represents the sample of a document element. The object must contain 2 parameters: ''itemId'' and ''url''.'
+                  type: object
+                  properties:
+                    itemId:
+                      type: string
+                    url:
+                      type: string
+                dueDate:
+                  description: 'The due date of the request. The due date should be encoded as a string using ISO 8601 format.'
+                  type: string
+                createdBy:
+                  type: string
+                  description: The ID of the user that is sending the request. This user must have access to the request.
+                assignedTo:
+                  description: 'The ID of the team member you want to assign the request to. You can also use the email address of the team member.'
+                  type: string
+                sendMessage:
+                  type: boolean
+                  description: 'Boolean. If set to false, the sequence of messages planned in your campaign will not be sent.'
+                sendCompletionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "completed". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendRejectionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending" and at least one element on the portal has been rejected. This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendReopenMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+              required:
+                - campaignId
+                - contact
+            examples:
+              - campaignId: xvr69EYLKXvTkfYuk
+                contact: 
+                  email: erlich.bachman@example.com
+                  firstName: Erlich
+                  lastName: Bachman
+                  company: Bachmanity
+                  data: 
+                    brand: Bachmanity
+                    model: Roadster
+              - campaignId: xvr69EYLKXvTkfYuk
+                contact: WmTjsFknzHdmfs3Ra
+      responses:
+        '200':
+          description: List of requests of a campaigns.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request:
+                    $ref: '#/components/schemas/CampaignRequest'
+                  errors:
+                    type: array
+                    items: {}
+              example:
+                request: 
+                  _id: nw42MmBsJoccgutST
+                  campaignId: xvr69EYLKXvTkfYuk
+                  createdAt: 2024-07-04T07:20:06.085Z
+                  portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/nw42MmBsJoccgutST/c/nw42MmBsJoccgutST
+                  status: pending
+                  dueDate: 2024-07-11T21:59:00.000Z
+                  privacy: private
+                  contact: 
+                    _id: WmTjsFknzHdmfs3Ra
+                    email: richard.hendricks@example.com
+                    firstName: Richard
+                    lastName: Hendricks
+                    nbRequest: 5
+                    createdAt: 2024-07-03T13:51:27.666Z
+                    lastActivity: 2024-07-04T07:20:06.080Z
+                  branding:
+                    useBranding: false
+                errors: []      
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    patch:
+      tags:
+        - Requests
+      operationId: modify-a-request
+      summary: Modify a request
+      description: This endpoint retrieves all the details of a specific request including the answers of the forms and the documents that have been uploaded.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestId:
+                  type: string
+                  description: The ID of the request you want to modify.
+                status:
+                  description: |
+                    The new status of the request. Can be one of the predifined status `pending`, `completed`, `waiting`, `canceled`, `archived` or a custom status that you previously have created on your account.
+                  type: string
+                dueDate:
+                  description: The new due date of the request. The due date should be encoded as a string using ISO 8601 format.
+                  type: string
+                data:
+                  description: An object with custom data that you want to use in your request.
+                  type: object
+                assignedTo:
+                  description: The ID of the team member you want to assign the request to. Use 'unset' if you want to unassign the request.
+                  type: string
+                sendCompletionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "completed". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendRejectionMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending" and at least one element on the portal has been rejected. This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+                sendReopenMessage:
+                  description: 'Boolean. If set to true, a message will be automatically send when the request status will be changed to "pending". This message can be customized in the branding settings used for this campaign.'
+                  type: boolean
+            example: 
+              requestId: bbbBkrejSaJkHWwDE
+              status: pending
+      responses:
+        '200':
+          description: List of requests of a campaigns.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request:
+                    $ref: '#/components/schemas/CampaignRequest'
+                  errors:
+                    type: array
+                    items: {}
+              example:
+                request: 
+                  _id: bbbBkrejSaJkHWwDE
+                  campaignId: 7gDq3XyLyixkhqoHa
+                  createdAt: 2024-02-21T10:31:52.004Z
+                  status: pending
+                  dueDate: null
+                  portalUrl: https://app.usecollect.com/portal/LzP5r56tpqh3gteCf/bbbBkrejSaJkHWwDE/c/bbbBkrejSaJkHWwDE
+                  privacy: private
+                  contact: 
+                    _id: ngxhLDiDGEBS2jjKh
+                    email: erlich.bachman@example.com
+                    firstName: Erlich
+                    lastName: Bachman
+                    company: Bachmanity
+                    tag: []
+                    custom: []
+                    createdAt: 2024-11-16T05:00:43.657Z
+                    lastActivity: 2024-02-21T10:31:52.001Z
+                  branding: 
+                    useBranding: true
+                    brandingId: bJoTr6kHikTRDsvSd
+                  sendCompletionMessage: true
+                errors: []
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /contributors:
+    post:
+      tags:
+        - Requests
+      operationId: add-a-contributor
+      summary: Add a contributor
+      description: This endpoint allows you to add new contacts or existing contacts as contributors of a request.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestId:
+                  type: string
+                  description: The ID of the request you want to add the contributor to.
+                contacts:
+                  items:
+                    $ref: '#/components/schemas/ContactMultipleRequest'
+                  description: | 
+                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact))
+                  type: array
+              required:
+                - campaignId
+                - contact
+            examples:
+              - requestId: xvr69EYLKXvTkfYuk
+                contact: 
+                  email: erlich.bachman@example.com
+                  firstName: Erlich
+                  lastName: Bachman
+                  company: Bachmanity
+                  data: 
+                    brand: Bachmanity
+                    model: Roadster
+              - requestId: xvr69EYLKXvTkfYuk
+                contact: WmTjsFknzHdmfs3Ra
+      responses:
+        '200':
+          description: List of requests of a campaigns.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request:
+                    $ref: '#/components/schemas/CampaignRequest'
+                  errors:
+                    type: array
+                    items: {}
+              example:
+                request: 
+                  _id: nw42MmBsJoccgutST
+                  campaignId: xvr69EYLKXvTkfYuk
+                  createdAt: 2024-12-04T07:20:06.085Z
+                  portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/nw42MmBsJoccgutST/c/Mz6oP9sU4xY7aB0u
+                  status: pending
+                  dueDate: 2024-12-11T21:59:00.000Z
+                  privacy: private
+                  contact: 
+                    _id: xtPWKQqcAk8MJfoz5
+                    email: jared.dunn@example.com
+                    firstName: Jared
+                    lastName: Dunn
+                    nbRequest: 5
+                    createdAt: 2024-12-03T13:51:27.666Z
+                    lastActivity: 2024-12-04T07:20:06.080Z
+                  contributors:
+                    - _id: WmTjsFknzHdmfs3Ra
+                      email: gilfoyle@example.com
+                      firstName: Bertram
+                      lastName: Gilfoyle
+                      createdAt: 2024-12-03T13:51:27.666Z
+                  branding:
+                    useBranding: false
+                errors: []      
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/contributors/{requestId}':
+    delete:
+      tags:
+        - Requests
+      operationId: remove-a-contributor
+      summary: Remove a contributor
+      description: |
+        This endpoint remove an existing contributor from a request. You need to specify the contactId or the email of the contact. It returns an object with the requestId and the contactId.
+
+        > error
+        > This action can't be cancelled. Use it at your own risk.
+      parameters:
+        - name: requestId
+          in: path
+          description: Specify the ID of the request.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: contactId
+          description: Specify the ID of the contact to remove.
+          schema:
+            type: string
+        - in: path
+          name: email
+          description: Specify the email of the contact to remove.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ID of the request
+                  contactId:
+                    type: string
+                  deleted:
+                    type: boolean
+              example:
+                id: XigRzPs4N5vwX3Rks
+                contactId: SSKm6i9cxbvZuLRDB
+                deleted: true
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /syncdocs:
+    post:
+      tags:
+        - Requests
+      operationId: trigger-sync
+      summary: Trigger docs sync
+      description: This endpoint allows you to trigger the synchronisation of uploaded documents to a cloud storage. Only the documents that have not been synced so far will be sent to the cloud.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestId:
+                  type: string
+                  description: The ID of the request you want to trigger the synchronisation.
+              required:
+                - requestId
+            examples:
+              - requestId: nw42MmBsJoccgutST
+      responses:
+        '200':
+          description: Specific Request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request:
+                    $ref: '#/components/schemas/CampaignRequest'
+                  errors:
+                    type: array
+                    items: {}
+              example:
+                request: 
+                  _id: nw42MmBsJoccgutST
+                  campaignId: xvr69EYLKXvTkfYuk
+                  createdAt: 2024-07-04T07:20:06.085Z
+                  portalUrl: https://app.usecollect.com/portal/uGFRDeEL3Ct2uYo2c/nw42MmBsJoccgutST/c/nw42MmBsJoccgutST
+                  status: pending
+                  dueDate: 2024-07-11T21:59:00.000Z
+                  privacy: private
+                  contact: 
+                    _id: xtPWKQqcAk8MJfoz5
+                    email: jared.dunn@example.com
+                    firstName: Richard
+                    lastName: Hendricks
+                    nbRequest: 5
+                    createdAt: 2024-07-03T13:51:27.666Z
+                    lastActivity: 2024-07-04T07:20:06.080Z
+                  contributors:
+                    - _id: WmTjsFknzHdmfs3Ra
+                      email: richard.hendricks@example.com
+                      firstName: Erlich
+                      lastName: Bachman
+                      createdAt: 2024-07-03T13:51:27.666Z
+                  branding:
+                    useBranding: false
+                errors: []      
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}/messages':
+    get:
+      tags:
+        - Requests
+      operationId: list-request-messages
+      summary: List Messages
+      description: |
+        Retrieve all messages for a request, sorted by `createdAt` descending. Each message includes a `channel` field (internal, email, or sms). Internal messages use the title/text format; email and SMS messages use the title/body/status/sendOn format.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request
+          schema:
+            type: string
+        - name: channel
+          in: query
+          required: false
+          description: Filter by channel (internal, email, or sms). If omitted, returns all messages across all channels.
+          schema:
+            type: string
+            enum: [internal, email, sms]
+      responses:
+        '200':
+          description: List of messages for the request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+              examples:
+                mixed:
+                  summary: Mixed channels
+                  value:
+                    - id: msg_123
+                      requestId: req_456
+                      channel: internal
+                      title: AI Agent - reply sent
+                      text: Here is the response generated by the agent...
+                      createdAt: 2026-01-21T10:12:46.120Z
+                      updatedAt: 2026-01-21T10:12:46.120Z
+                    - id: msg_124
+                      requestId: req_456
+                      channel: email
+                      title: Your email subject
+                      body: Your message body
+                      status: pending
+                      sendOn: 2026-02-06T10:00:00.000Z
+                      createdAt: 2026-02-06T09:00:00.000Z
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      tags:
+        - Requests
+      operationId: create-request-message
+      summary: Create Message
+      description: |
+        Create a new message on a request. Supports three channels: **internal** (default), **email**, and **sms**.
+
+        **internal (default):** Creates an internal message visible in the interface only. Same behavior as before. Use `title` and optionally `text`.
+
+        **email:** Sends an email to the request's contact. Requires accreditation on your account. Returns 403 if not enabled. Requires `title` (min 10 characters) and `body` (min 20 characters). Optional `sendOn` (ISO 8601) to schedule; if omitted, message is sent immediately.
+
+        **sms:** Sends an SMS to the request's contact. Requires accreditation and available SMS credits. Returns 403 if not enabled or no SMS capability. Requires `body` (min 20 characters). Optional `sendOn` to schedule.
+
+        Possible `status` values on creation for email/SMS: `pending` (queued, will be sent at sendOn), `creditMissing` (SMS only, no credits), `phoneError` (SMS only, contact has no valid phone).
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                channel:
+                  type: string
+                  enum: [internal, email, sms]
+                  default: internal
+                  description: One of internal, email, sms. Defaults to internal if omitted.
+                title:
+                  type: string
+                  minLength: 10
+                  description: Required for internal and email. For email, must be at least 10 characters. Not used for sms.
+                text:
+                  type: string
+                  nullable: true
+                  description: Text content for internal channel only (supports markdown). Not used for email/sms.
+                body:
+                  type: string
+                  minLength: 20
+                  description: Required for email and sms. Must be at least 20 characters.
+                sendOn:
+                  type: string
+                  format: date-time
+                  description: For email and sms only. Schedule the message for a future date (ISO 8601). Must be in the future. If omitted, the message is sent immediately.
+            examples:
+              internal:
+                summary: Internal message
+                value:
+                  channel: internal
+                  title: AI Agent - reply sent
+                  text: Here is the response generated by the agent...
+              email:
+                summary: Email message
+                value:
+                  channel: email
+                  title: Your email subject here
+                  body: Your message body with at least twenty characters.
+                  sendOn: 2026-02-06T10:00:00.000Z
+              sms:
+                summary: SMS message
+                value:
+                  channel: sms
+                  body: Your SMS body with at least twenty characters.
+      responses:
+        '201':
+          description: Message created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                internal:
+                  summary: Internal message response
+                  value:
+                    id: abc123
+                    requestId: req456
+                    channel: internal
+                    title: Your title
+                    text: Your text or null
+                    createdAt: 2026-02-06T10:00:00.000Z
+                    updatedAt: 2026-02-06T10:00:00.000Z
+                emailOrSms:
+                  summary: Email or SMS message response
+                  value:
+                    id: abc123
+                    requestId: req456
+                    channel: email
+                    title: Your email subject
+                    body: Your message body
+                    status: pending
+                    sendOn: 2026-02-06T10:00:00.000Z
+                    createdAt: 2026-02-06T10:00:00.000Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}/messages/{messageId}':
+    get:
+      tags:
+        - Requests
+      operationId: get-request-message
+      summary: Get Single Message
+      description: |
+        Retrieve a specific message by ID. Works for all channels (internal, email, SMS). The response format depends on the channel — internal messages use title/text/updatedAt; email and SMS use title/body/status/sendOn (see Message schema and POST response examples).
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          description: The ID of the message
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message details (format depends on channel)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              examples:
+                internal:
+                  value:
+                    id: msg_123
+                    requestId: req_456
+                    channel: internal
+                    title: AI Agent - reply sent
+                    text: Here is the response generated by the agent...
+                    createdAt: 2026-01-21T10:12:46.120Z
+                    updatedAt: 2026-01-21T10:12:46.120Z
+                email:
+                  value:
+                    id: msg_124
+                    requestId: req_456
+                    channel: email
+                    title: Your email subject
+                    body: Your message body
+                    status: pending
+                    sendOn: 2026-02-06T10:00:00.000Z
+                    createdAt: 2026-02-06T09:00:00.000Z
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    patch:
+      tags:
+        - Requests
+      operationId: update-request-message
+      summary: Update Message
+      description: |
+        Partially update a message. Only provided fields will be updated.
+
+        **Internal messages:** `title` (string), `text` (string or `null` to clear). Same as before.
+
+        **Email messages:** `title` (new subject, min 10 characters), `body` (min 20 characters), `sendOn` (new scheduled date, must be in the future). Rejected for sms.
+
+        **SMS messages:** `body` (min 20 characters), `sendOn` (must be in the future). Title is rejected for sms.
+
+        Email and SMS messages can only be modified while status is **pending** or **paused**. If the message has already been sent or is being sent (sending, sent, opened, clicked), the API returns **409 Conflict**.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          description: The ID of the message
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  minLength: 10
+                  description: New title. For internal and email only; rejected for sms. For email, min 10 characters.
+                text:
+                  type: string
+                  nullable: true
+                  description: New text for internal channel. Can be `null` to clear. Supports markdown.
+                body:
+                  type: string
+                  minLength: 20
+                  description: New message body for email and sms. Min 20 characters.
+                sendOn:
+                  type: string
+                  format: date-time
+                  description: New scheduled date for email/sms. Must be in the future.
+            example:
+              title: AI Agent - follow-up sent
+              text: Updated body text...
+      responses:
+        '200':
+          description: Message updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+              example:
+                id: msg_123
+                requestId: req_456
+                channel: internal
+                title: AI Agent - follow-up sent
+                text: Updated body text...
+                createdAt: '2026-01-21T10:12:46.120Z'
+                updatedAt: 2026-01-21T10:20:01.900Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          description: Message has already been sent and cannot be modified.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: Message has already been sent and cannot be modified
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    delete:
+      tags:
+        - Requests
+      operationId: delete-request-message
+      summary: Delete Message
+      description: |
+        Delete a message. Internal messages can always be deleted. Email and SMS messages can only be deleted while their status is **pending** or **paused**. Returns **409 Conflict** if the message has already been sent or is being sent.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request
+          schema:
+            type: string
+        - name: messageId
+          in: path
+          required: true
+          description: The ID of the message
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Message deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          description: Message has already been sent and cannot be deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 409
+                  message:
+                    type: string
+                    example: Message has already been sent and cannot be deleted
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}/export':
+    get:
+      tags:
+        - Requests
+      operationId: export-request-pdf
+      summary: Export request in PDF
+      description: |
+        Generate a collated PDF for a given request and get a temporary download URL.
+        **Authentication:** Same as the rest of the API (API key e.g. `Authorization: Basic <base64(apiKey:)>` or `?api_key=...`, or OAuth Bearer token). The authenticated user must have **requests-download** permission for the request.
+        **Default export (templateId omitted):** All uploaded documents for that request, in item order. Forms are not included.
+        **Custom template (templateId set):** Export follows the template (documents, static pages, PDFs, forms, order, "do not include if form has no answers", etc.). Template IDs are shown in the app in "Manage your PDF exports" (list and in the template detail modal when editing).
+        The client should use the returned `url` with a simple GET (e.g. redirect or fetch) to download the PDF. The link is valid for 15 minutes; after that a new export must be requested.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: ID of the request to export.
+          schema:
+            type: string
+        - name: templateId
+          in: query
+          required: false
+          description: |
+            ID of the export template to use. If omitted, the default export is used (all uploaded documents in item order, no forms).
+            Custom template IDs are shown in the app in "Manage your PDF exports".
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Pre-signed URL to download the generated PDF.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - url
+                  - expiresIn
+                properties:
+                  url:
+                    type: string
+                    description: Pre-signed S3 URL to download the generated PDF.
+                  expiresIn:
+                    type: integer
+                    description: Validity of the URL in seconds (always 900, i.e. 15 minutes).
+                    example: 900
+              example:
+                url: https://collecttempseu.s3.eu-west-3.amazonaws.com/export-abc123.pdf?X-Amz-Algorithm=...
+                expiresIn: 900
+        '400':
+          description: Nothing to export (e.g. template results in an empty list, or export not supported for this storage).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    description: Reason for the error
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          description: Forbidden — user not allowed to download this request (e.g. missing requests-download permission).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 403
+                  message:
+                    type: string
+                    example: Forbidden
+        '404':
+          description: Not found — invalid or unknown requestId, or template not found when templateId is provided.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    description: 'Not found, or "Export template not found" when templateId is invalid.'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          description: Server or Lambda error during export or URL generation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 500
+                  message:
+                    type: string
+                    description: Error reason
+        '503':
+          $ref: '#/components/responses/503'
+  '/elements/{elementId}':
+    get:
+      tags:
+        - Elements
+      operationId: get-a-specific-element
+      summary: Get a specific element
+      description: This endpoint retrieves all the details of a specific element including the answers of the forms and the documents that have been uploaded.
+      parameters:
+        - name: elementId
+          in: path
+          required: true
+          description: The ID of the element to retrieve
+          schema:
+            type: string
+        - name: expires
+          in: query
+          required: false
+          description: |
+            Optionally specify the period of validity of the url to access the uploaded documents. Should be an integer, default is `900` (15 minutes) and maximum is `3600` (1 hour).
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Returns a specific element
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Element'
+              examples:
+                Document:
+                  value:
+                    id: eEDJFD5unNQTHoSBZ
+                    itemId: urRJfPK7CfyGBnHg8
+                    name: ID
+                    order: 3
+                    visibility: true
+                    status: approved
+                    mandatory: true
+                    multipleupload: true
+                    uploads: 
+                      - createdAt: 2024-02-21T11:27:32.602Z
+                        name: Erlich's ID.pdf
+                        url: https://collectuseast.s3.amazonaws.com/erlich_id.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=bglKxNBqqcDKkAeuzmxoBS2IOQQ%3D
+                        size: 2414511
+                        scannedOn: 2024-02-21T11:27:52.903Z
+                        virusScanned: true
+                    type: docs
+                    request:
+                      _id: bbbBkrejSaJkHWwDE
+                      campaignId: 7gDq3XyLyixkhqoHa
+                Form:
+                  value:
+                    id: 2ewEw5L6amQiJ6J2A
+                    itemId: dy8SYGJauWwhDcGrp
+                    name: Company info
+                    order: 0
+                    visibility: true
+                    status: open
+                    items: 
+                      - name: Company name
+                        type: shortText
+                        answer: Pied Piper
+                      - name: What size is your company
+                        type: dropdown
+                        answer: 50-250 employees
+                      - name: Where is your company located?
+                        type: multi
+                        answer: [🇺🇸 USA, 🇪🇺 Europe]
+                    type: form
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+                Sign:
+                  value:
+                    id: e6bggjBX7vdWKWYwq
+                    itemId: urRJfPK7CfyGBnHg8
+                    name: NDA with Pied Piper Corp
+                    order: 2
+                    visibility: true
+                    status: signed
+                    uploads: 
+                      - id: KErM5RgjHWjnBPLXz
+                        createdAt: 2024-04-18T10:19:31.653Z
+                        name: New doc to sign.pdf
+                        url: https://collecteurope.s3.eu-west-3.amazonaws.com/YcnS5JKMnG5cA3TXK/qtBHzvbbjsiuW8NSr/1735689600000_new_doc_to_sign.pdf
+                        size: 199498
+                        scannedOn: 2024-04-18T10:19:51.234Z
+                        virusScanned: true
+                      - id: SjgRfMK9Bnj6JYvTy
+                        createdAt: 2024-04-18T10:19:33.479Z
+                        name: Summary.pdf
+                        url: https://collecteurope.s3.eu-west-3.amazonaws.com/YcnS5JKMnG5cA3TXK/qtBHzvbbjsiuW8NSr/1735689600000_summary.pdf
+                        size: 280284
+                        scannedOn: 2024-04-18T10:19:53.964Z
+                        virusScanned: true
+                    type: sign
+                    request:
+                      _id: bbbBkrejSaJkHWwDE
+                      campaignId: 7gDq3XyLyixkhqoHa
+                Text:
+                  value:
+                    id: BKJ95xmpHSyo7KuRC
+                    itemId: 7LBBC8LwnBnQoz8ae
+                    name: Text block
+                    order: 4
+                    visibility: true
+                    type: text
+                    text: Hello World!
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+                Page:
+                  value:
+                    id: XigRzPs4N5vwX3Rks
+                    itemId: L3uAmzDRJjWTm2TMR
+                    name: More details
+                    order: 2
+                    visibility: true
+                    type: page
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    delete:
+      tags:
+        - Elements
+      operationId: delete-an-element
+      summary: Delete an element
+      description: |
+        This endpoint delete an existing element and all the answers / documents linked to it. It returns an object with the elementId.
+
+        > error
+        > This action can't be cancelled. Use it at your own risk.
+      parameters:
+        - name: elementId
+          in: path
+          description: Specify the ID of the element to delete.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  deleted:
+                    type: boolean
+              example:
+                id: XigRzPs4N5vwX3Rks
+                deleted: true
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /elements:
+    post:
+      tags:
+        - Elements
+      operationId: add-an-element
+      summary: Add an element
+      description: 'This endpoint allows you to add an element to an existing request. You can currently add docs, text and pages. form will come later.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddElement'
+            examples:
+              Document:
+                value:
+                  requestId: bbbBkrejSaJkHWwDE
+                  type: docs
+                  name: ID
+                  order: 3
+              Text:
+                value:
+                  requestId: GTonevwqoPPJ2PYEy
+                  type: text
+                  order: 4
+                  text: Hello World!
+              Page:
+                value:
+                  requestId: GTonevwqoPPJ2PYEy
+                  type: page
+                  order: 2
+                  name: More details
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Element'
+              examples:
+                Document:
+                  value:
+                    id: eEDJFD5unNQTHoSBZ
+                    itemId: urRJfPK7CfyGBnHg8
+                    name: ID
+                    order: 3
+                    visibility: true
+                    status: open
+                    mandatory: true
+                    multipleupload: true
+                    uploads: []
+                    type: docs
+                    request:
+                      _id: bbbBkrejSaJkHWwDE
+                      campaignId: 7gDq3XyLyixkhqoHa
+                Text:
+                  value:
+                    id: BKJ95xmpHSyo7KuRC
+                    itemId: 7LBBC8LwnBnQoz8ae
+                    name: Text block
+                    order: 4
+                    visibility: true
+                    type: text
+                    text: Hello World!
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+                Page:
+                  value:
+                    id: XigRzPs4N5vwX3Rks
+                    itemId: L3uAmzDRJjWTm2TMR
+                    name: More details
+                    order: 2
+                    visibility: true
+                    type: page
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    patch:
+      tags:
+        - Elements
+      operationId: modify-an-element
+      summary: Modify an element
+      description: This endpoint allows you to modify an element of a request.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyElement'
+            examples:
+              Document:
+                value:
+                  elementId: eEDJFD5unNQTHoSBZ
+                  status: rejected
+                  reason: The document is not readable
+              Form:
+                value:
+                  requestId: 2ewEw5L6amQiJ6J2A
+                  status: approved
+                  visibility: false
+              Sign:
+                value:
+                  requestId: e6bggjBX7vdWKWYwq
+                  name: NDA with Pied Piper Corp
+              Text:
+                value:
+                  requestId: BKJ95xmpHSyo7KuRC
+                  type: text
+                  order: 4
+                  text: Hello everyone!
+              Page:
+                value:
+                  requestId: XigRzPs4N5vwX3Rks
+                  type: page
+                  order: 3
+                  name: More details
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Element'
+              examples:
+                Document:
+                  value:
+                    id: eEDJFD5unNQTHoSBZ
+                    itemId: urRJfPK7CfyGBnHg8
+                    name: ID
+                    order: 3
+                    visibility: true
+                    status: rejected
+                    reason: The document is not readable
+                    mandatory: true
+                    multipleupload: true
+                    uploads: 
+                      - createdAt: 2024-02-21T11:27:32.602Z
+                        name: Erlich's ID.pdf
+                        url: https://collectuseast.s3.amazonaws.com/erlich_id.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=bglKxNBqqcDKkAeuzmxoBS2IOQQ%3D
+                        size: 2414511
+                        scannedOn: 2024-02-21T11:27:52.903Z
+                        virusScanned: true
+                    type: docs
+                    request:
+                      _id: bbbBkrejSaJkHWwDE
+                      campaignId: 7gDq3XyLyixkhqoHa
+                Form:
+                  value:
+                    id: 2ewEw5L6amQiJ6J2A
+                    itemId: dy8SYGJauWwhDcGrp
+                    name: Company info
+                    order: 0
+                    visibility: false
+                    status: approved
+                    items: 
+                      - name: Company name
+                        type: shortText
+                        answer: Pied Piper
+                      - name: What size is your company
+                        type: dropdown
+                        answer: 50-250 employees
+                      - name: Where is your company located?
+                        type: multi
+                        answer: [🇺🇸 USA, 🇪🇺 Europe]
+                    type: form
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+                Sign:
+                  value:
+                    id: e6bggjBX7vdWKWYwq
+                    itemId: urRJfPK7CfyGBnHg8
+                    name: NDA with Pied Piper Corp
+                    order: 2
+                    visibility: true
+                    status: signed
+                    uploads: 
+                      - id: KErM5RgjHWjnBPLXz
+                        createdAt: 2024-04-18T10:19:31.653Z
+                        name: New doc to sign.pdf
+                        url: https://collecteurope.s3.eu-west-3.amazonaws.com/YcnS5JKMnG5cA3TXK/qtBHzvbbjsiuW8NSr/1735689600000_new_doc_to_sign.pdf
+                        size: 199498
+                      - id: SjgRfMK9Bnj6JYvTy
+                        createdAt: 2024-04-18T10:19:33.479Z
+                        name: Summary.pdf
+                        url: https://collecteurope.s3.eu-west-3.amazonaws.com/YcnS5JKMnG5cA3TXK/qtBHzvbbjsiuW8NSr/1735689600000_summary.pdf
+                        size: 280284
+                    type: sign
+                    request:
+                      _id: bbbBkrejSaJkHWwDE
+                      campaignId: 7gDq3XyLyixkhqoHa
+                Text:
+                  value:
+                    id: BKJ95xmpHSyo7KuRC
+                    itemId: 7LBBC8LwnBnQoz8ae
+                    name: Text block
+                    order: 4
+                    visibility: true
+                    type: text
+                    text: Hello everyone!
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+                Page:
+                  value:
+                    id: XigRzPs4N5vwX3Rks
+                    itemId: L3uAmzDRJjWTm2TMR
+                    name: More details
+                    order: 3
+                    visibility: true
+                    type: page
+                    request: 
+                      _id: GTonevwqoPPJ2PYEy
+                      campaignId: 3ya2sjN9GYwYAHeSi
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /upload:
+    post:
+      tags:
+        - Elements
+      operationId: upload
+      summary: Upload a file
+      description: |
+        This endpoint allows you to upload a file to a doc element. You can upload a remote file using the `url` parameter or a file encoded in base64 using the `data` parameter.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadFile'
+            example:
+              elementId: eEDJFD5unNQTHoSBZ
+              url: https://randomremoteserver.com/whitepaper.pdf
+              name: whitepaper.pdf
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocElement'
+              example:
+                id: eEDJFD5unNQTHoSBZ
+                itemId: urRJfPK7CfyGBnHg8
+                name: ID
+                order: 3
+                visibility: true
+                status: open
+                mandatory: true
+                multipleupload: true
+                uploads: 
+                  id: z2A3thsdGaLSidmQq
+                  createdAt: 2024-01-31T06:53:36.472Z
+                  name: whitepaper.pdf
+                  url: https://collectuseast.s3.amazonaws.com/samples/business_plan_acme.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=tS9MixgslTykB6fKE8aFTqArzek%3D
+                  size: 344701
+                  scannedOn: 2024-01-31T06:54:06.639Z
+                  virusScanned: true
+                type: docs
+                request:
+                  _id: bbbBkrejSaJkHWwDE
+                  campaignId: 7gDq3XyLyixkhqoHa
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /upload-sign:
+    post:
+      tags:
+        - Elements
+      operationId: upload-sign-document
+      summary: Upload document for e-signature
+      description: |
+        This endpoint allows you to upload a document to an e-sign element for signature. You can upload a remote file using the `url` parameter or a file encoded in base64 using the `data` parameter.
+        
+        The file size is limited to 20Mb regardless of the upload method chosen.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - elementId
+                - name
+              properties:
+                elementId:
+                  type: string
+                  description: ID of the e-sign element you want to add the document to
+                url:
+                  type: string
+                  description: URL of the remote file to sign. The file size is limited to 20Mb.
+                data:
+                  type: string
+                  description: Base64 encoded file. The file size is limited to 20Mb.
+                name:
+                  type: string
+                  description: Name of the file **with** the file extension.
+            example:
+              elementId: CdXhhTe59xPNqJDMh
+              name: partnership_agreement.pdf
+              data: JVBERi0xLjQKJdPr6eEKMSAwIG9iago8PC9UaXRsZSAoTmV3IGRvYyB0byBzaWduKQovUHJvZHVjZXIgKFNraWEvUERGIG0xMTQgR29vZ2xlIERvY3MgUmVuZGVyZXIpPj4KZW5kb2JqCjMgMCBvYmoKPDwvY2EgMQovQk0gL05vcm1....
+      responses:
+        '200':
+          description: Successfully uploaded document for signature
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Element ID
+                  itemId:
+                    type: string
+                    description: Reference of the element in the campaign
+                  name:
+                    type: string
+                    description: Element name
+                  order:
+                    type: integer
+                    description: Element order
+                  visibility:
+                    type: boolean
+                    description: Visibility of the element on the portal
+                  visibilityConditionnal:
+                    type: boolean
+                    description: Whether the visibility is conditional
+                  status:
+                    type: string
+                    description: Status of the signature element
+                    enum: [not-sent, sent, signed, rejected]
+                  type:
+                    type: string
+                    description: Element type
+                    enum: [sign]
+                  request:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: Request ID
+                      campaignId:
+                        type: string
+                        description: Campaign ID
+              example:
+                id: CdXhhTe59xPNqJDMh
+                itemId: a3qRLd684bWLt3a5s
+                name: Partnership Agreement
+                order: 0
+                visibility: true
+                visibilityConditionnal: true
+                status: not-sent
+                type: sign
+                request:
+                  _id: 3SBSzkmEMqitQY9ot
+                  campaignId: SXwNhaTXzcjoYx9Ea
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /trigger-sign:
+    post:
+      tags:
+        - Elements
+      operationId: trigger-sign
+      summary: Trigger e-signature
+      description: |
+        This endpoint triggers the e-signature process for a document. Once triggered, the status will change from "not-sent" to "sent" and no further modifications will be accepted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - elementId
+              properties:
+                elementId:
+                  type: string
+                  description: ID of the e-sign element you want to trigger the signature for
+            example:
+              elementId: JfcGWum37pXtd2Bsq
+      responses:
+        '200':
+          description: Successfully triggered e-signature process
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Element ID
+                  itemId:
+                    type: string
+                    description: Reference of the element in the campaign
+                  name:
+                    type: string
+                    description: Element name
+                  order:
+                    type: integer
+                    description: Element order
+                  visibility:
+                    type: boolean
+                    description: Visibility of the element on the portal
+                  visibilityConditionnal:
+                    type: boolean
+                    description: Whether the visibility is conditional
+                  status:
+                    type: string
+                    description: Status of the signature element
+                    enum: [not-sent, sent, signed, rejected]
+                  type:
+                    type: string
+                    description: Element type
+                    enum: [sign]
+                  request:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: Request ID
+                      campaignId:
+                        type: string
+                        description: Campaign ID
+              example:
+                id: JfcGWum37pXtd2Bsq
+                itemId: a3qRLd684bWLt3a5s
+                name: Partnership Agreement with Pied Piper Corp
+                order: 0
+                visibility: true
+                visibilityConditionnal: true
+                status: sent
+                type: sign
+                request:
+                  _id: SP2DvMdB98mPB264c
+                  campaignId: SXwNhaTXzcjoYx9Ea
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /webhooks:
+    get:
+      tags:
+        - Webhooks
+      operationId: List-all-webhook-endpoints
+      summary: List all webhook's endpoints
+      description: This endpoint retrieves all your webhooks.
+      responses:
+        '200':
+          description: List of webhooks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Webhook'
+              example:
+                - _id: HBsDeedGXx7BYbXwo
+                  targetUrl: https://youserver.com/collect-hook
+                  status: active
+                  createdAt: 2024-07-05T14:30:41.215Z
+                  secretToken: whsec_example_do_not_use
+                - _id: mLASNBTu9n6vB6Zss
+                  targetUrl: https://yourserver.com/collect-hook-two
+                  campaignId: mYCsdgB4DQoENBaX6
+                  types: [docUploadedformSubmited]
+                  status: active
+                  createdAt: 2024-07-06T15:21:15.655Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      tags:
+        - Webhooks
+      summary: Add a webhook
+      description: This endpoint add a new webhook. It returns the webhook object.
+      operationId: add-a-webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddWebhookRequest'
+            example:
+              targetUrl: https://yourserver.com/collect-hook
+              types: [created, statusChanged, dueDateChanged]
+              campaignId: sGyGrNPDxQDy6ZRAm
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddWebhookResponse'
+              example:
+                _id: eqQkPdnqwN7J38QEx
+                targetUrl: https://yourserver.com/collect-hook
+                status: active
+                types: [created, statusChanged, dueDateChanged]
+                createdAt: 2024-07-13T15:01:38.219Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/webhooks/{webhookId}':
+    post:
+      tags:
+        - Webhooks
+      operationId: modify-webhook
+      summary: Modify a webhook
+      description: This endpoint modify an existing webhook. It returns the webhook object.
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          description: Specify the ID of the webhook to modify.
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/AddWebhookRequest'
+                - type: object
+                  properties:
+                    status:
+                      description: The status of the webhook. It can be active or paused
+                      type: string
+                      enum:
+                        - active
+                        - paused
+            example:
+              status: paused
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddWebhookResponse'
+              example:
+                _id: eqQkPdnqwN7J38QEx
+                targetUrl: https://yourserver.com/collect-hook
+                status: paused
+                types: [created, statusChanged, dueDateChanged]
+                createdAt: 2024-07-13T15:01:38.219Z
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    delete:
+      tags:
+        - Webhooks
+      operationId: delete-webhook
+      summary: Delete webhook
+      description: This endpoint modify an existing webhook. It returns the webhook object.
+      parameters:
+        - name: webhookId
+          in: path
+          required: true
+          description: Specify the ID of the webhook to delete.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  deleted:
+                    type: boolean
+              example:
+                id: eqQkPdnqwN7J38QEx
+                deleted: true
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  /contacts:
+    get:
+      tags:
+        - Contacts
+      operationId: list-all-contacts
+      summary: List all contacts
+      description: Retrieve all contacts shared by the team
+      parameters:
+        - in: query
+          name: offset
+          description: Ranking number of the first item on the page
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: limit
+          description: Number of results to return
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+          required: false
+        - in: query
+          name: sort
+          description: Specify how to sort the results
+          schema:
+            type: string
+            enum:
+              - fnAsc
+              - fnDesc
+              - lnAsc
+              - lnDesc
+              - emAsc
+              - emDesc
+              - tagAsc
+              - tagDesc
+          required: false
+        - in: query
+          name: search
+          description: String to look up. It will look up into email, first name, last name, and custom attributes. Will return partial matches.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: email
+          description: Email address you want to look up. This search is an exact match and is case-sensitive. 
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: firstname
+          description: First name you want to look up. This search is an exact match and is not case-sensitive.
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: lastname
+          description: Last name you want to look up. This search is an exact match and is not case-sensitive.
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+              example:
+                - _id: uBJadNFcjrC6emRom
+                  email: richard.hendricks@example.com
+                  firstName: Richard
+                  lastName: Hendricks
+                  tag: [ CEO ]
+                  custom: 
+                    - _id: yw6XDyeFvbqr86yA6
+                      name: Favorite color
+                      variable: color
+                      value: Blue
+                    - _id: CqdFwGX3yitk9zf8z
+                      name: Country
+                      variable: country
+                      value: US                
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      tags:
+        - Contacts
+      operationId: add-contact
+      summary: Add a contact
+      description: This endpoint add a new contact. It returns the contact object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContact'
+            example:
+              email: dinesh.chugtai@example.com
+              firstName: Dinesh
+              lastName: Chugtai
+              tags: 
+               - Developer
+              customFields: 
+                - variable: color
+                  value: Blue
+                - variable: country
+                  value: US
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Contact'
+                  - $ref: '#/components/schemas/ContactRequest'
+              example:
+                _id: uBJadNFcjrC6emRom
+                email: dinesh.chugtai@example.com
+                firstName: Dinesh
+                lastName: Chugtai
+                nbRequest: 0
+                tag: [ Developer ]
+                custom:
+                  - _id: yw6XDyeFvbqr86yA6
+                    name: Favorite color
+                    variable: color
+                    value: Blue
+                  - _id: CqdFwGX3yitk9zf8z
+                    name: Country
+                    variable: country
+                    value: US
+                createdAt: 2024-12-22T13:40:26.591Z
+                requests: []
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/contacts/{contactId}':
+    get:
+      tags:
+        - Contacts
+      operationId: get-specific-contact
+      summary: Get a specific contact
+      description: |
+        This endpoint retrieves a specific request.
+
+        > info
+        > The list of requests is limited to 50 results.
+      parameters:
+        - in: path
+          name: contactId
+          description: Specify the ID of the contact to retrieve.
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Contact'
+                  - $ref: '#/components/schemas/ContactRequest'
+              example:
+                _id: uBJadNFcjrC6emRom
+                email: gilfoyle@example.com
+                firstName: Bertram
+                lastName: Gilfoyle
+                tag: [ DevOps ]
+                custom: 
+                  - _id: yw6XDyeFvbqr86yA6
+                    name: Favorite color
+                    variable: color
+                    value: Blue
+                  - _id: CqdFwGX3yitk9zf8z
+                    name: Country
+                    variable: country
+                    value: US
+                createdAt: 2024-02-22T13:40:26.591Z
+                lastActivity: 2024-06-19T17:14:52.498Z
+                requests: 
+                  - _id: NxAHPWu9hRzcyD24m
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-02-22T13:40:26.671Z
+                    status: completed
+                    privacy: team
+                    branding: 
+                      useBranding: false
+                  - _id: jP6sXJ72R8xjxceaP
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-04-19T13:58:07.310Z
+                    status: completed
+                    privacy: team
+                    branding:
+                      useBranding: false
+                    note:
+                      date: 2024-05-04T14:25:17.254Z
+                      note: Asked him to send back another document
+                  - _id: FmZNnerEFRF3dLYPK
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-06-18T16:19:46.420Z
+                    status: pending
+                    privacy: team
+                    branding: 
+                      useBranding: true
+                      brandingId: jSEj7vHk3wLG3gRF7
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    post:
+      tags:
+        - Contacts
+      operationId: modify-contact
+      summary: Modify a contact
+      description: This endpoint modify an existing contact. It returns the contact object.
+      parameters:
+        - in: path
+          name: contactId
+          description: Specify the ID of the contact to modify.
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyContact'
+            example: 
+              firstName: Richard
+              lastName: Hendricks
+              customFields: 
+                - variable: color
+                  value: Blue
+                - variable: country
+                  value: US
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Contact'
+                  - $ref: '#/components/schemas/ContactRequest'
+              example:
+                _id: uBJadNFcjrC6emRom
+                email: richard.hendricks@example.com
+                firstName: Richard
+                lastName: Hendricks
+                tag: [ Speaker ]
+                custom: 
+                  - _id: yw6XDyeFvbqr86yA6
+                    name: Favorite color
+                    variable: color
+                    value: Blue
+                  - _id: CqdFwGX3yitk9zf8z
+                    name: Country
+                    variable: country
+                    value: US
+                createdAt: 2024-02-22T13:40:26.591Z
+                lastActivity: 2024-06-19T17:14:52.498Z
+                requests: 
+                  - _id: NxAHPWu9hRzcyD24m
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-02-22T13:40:26.671Z
+                    status: completed
+                    privacy: team
+                    branding: 
+                      useBranding: false
+                  - _id: jP6sXJ72R8xjxceaP
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-04-19T13:58:07.310Z
+                    status: completed
+                    privacy: team
+                    branding:
+                      useBranding: false
+                    note:
+                      date: 2024-05-04T14:25:17.254Z
+                      note: Asked him to send back another document
+                  - _id: FmZNnerEFRF3dLYPK
+                    campaignId: mYCsdgB4DQoENBaX6
+                    createdAt: 2024-06-18T16:19:46.420Z
+                    status: pending
+                    privacy: team
+                    branding: 
+                      useBranding: true
+                      brandingId: jSEj7vHk3wLG3gRF7
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    delete:
+      tags:
+        - Contacts
+      operationId: delete-contact
+      summary: Delete a contact
+      description: |
+        This endpoint delete an existing contact and all the requests linked to it. It returns an object with the contactId.
+
+        > error
+        > This action can't be cancelled. Use it at your own risk.
+      parameters:
+        - in: path
+          name: contactId
+          description: Specify the ID of the contact to delete.
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  deleted:
+                    type: boolean
+              example:
+                id: gqKBB8ZD4aHiY4Cb2
+                deleted: true
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+components:
+  schemas:
+    CreateContact:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of the contact
+        lastName:
+          type: string
+          description: Last name of the contact
+        email:
+          type: string
+          required: true
+          description: Email of the contact
+        company:
+          type: string
+          required: true
+          description: Company name of the contact
+        tag:
+          type: array
+          description: List of tags for the contact
+          items:
+            type: string
+        customFields:
+          $ref: '#/components/schemas/Custom'
+    ModifyContact:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of the contact
+        lastName:
+          type: string
+          description: Last name of the contact
+        email:
+          type: string
+          description: Email of the contact
+        company:
+          type: string
+          required: true
+          description: Company name of the contact
+        tag:
+          type: array
+          description: List of tags for the contact
+          items:
+            type: string
+        customFields:
+          $ref: '#/components/schemas/Custom'
+    ContactRequest:
+      type: object
+      properties:
+        _id:
+          type: string
+        campaignId:
+          type: string
+        createdAt:
+          type: string
+        status:
+          type: string
+        privacy:
+          type: string
+        branding:
+          $ref: '#/components/schemas/Branding'
+        note:
+          type: object
+          properties:
+            date:
+              type: string
+            note:
+              type: string
+    AddWebhookResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+        targetUrl:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        types:
+          type: array
+          items:
+            type: string
+            enum:
+              - created
+              - statusChanged
+              - portalSubmited
+              - dueDateChanged
+              - portalViewed
+              - docUploaded
+              - docDeleted
+              - docParsed
+              - itemApproved
+              - itemRejected
+              - itemReopened
+              - itemCancelValidation
+              - formSubmited
+              - emailSent
+              - emailClicked
+              - emailBounced
+              - emailOpened
+              - emailMarkedAsSpam
+              - emailBlocked
+              - emailUnsub
+              - smsSent
+              - smsDelivered
+              - smsClicked
+              - smsFailed
+              - smsUndelivered
+        campaignId:
+          type: string
+          description: We'll call this endpoint only for this campaignId.
+        secretToken:
+          type: string
+          description: 'If you specify a secret token, it will be sent with the hook request in the HTTP header.'
+    AddWebhookRequest:
+      type: object
+      required:
+        - targetUrl
+      properties:
+        targetUrl:
+          type: string
+          description: The URL of the webhook endpoint.
+        types:
+          type: array
+          description: The list of events to enable for this endpoint.
+          items:
+            type: string
+            enum:
+              - created
+              - statusChanged
+              - portalSubmited
+              - dueDateChanged
+              - portalViewed
+              - docUploaded
+              - docDeleted
+              - docParsed
+              - itemApproved
+              - itemRejected
+              - itemReopened
+              - itemCancelValidation
+              - formSubmited
+              - emailSent
+              - emailClicked
+              - emailBounced
+              - emailOpened
+              - emailMarkedAsSpam
+              - emailBlocked
+              - emailUnsub
+              - smsSent
+              - smsDelivered
+              - smsClicked
+              - smsFailed
+              - smsUndelivered
+        campaignId:
+          type: string
+          description: We'll call this endpoint only for this campaignId.
+        secretToken:
+          type: string
+          description: 'If you specify a secret token, it will be sent with the hook request in the HTTP header.'
+    Webhook:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier of the webhook
+        targetUrl:
+          type: string
+          description: URL to which the webhook will send the data
+        status:
+          type: string
+          description: Status of the webhook
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation date of the webhook
+        secretToken:
+          type: string
+          description: Secret token of the webhook
+        campaignId:
+          type: string
+          description: Unique identifier of the campaign associated with the webhook
+        types:
+          type: array
+          items:
+            type: string
+            description: Types of events that trigger the webhook
+    ModifyCommonElements:
+      type: object
+      properties:
+        elementId:
+          type: string
+          description: The ID of the element you want to modify.
+        name:
+          type: string
+          description: Name of the element.
+        order:
+          type: integer
+          description: Order of the element on the portal. Order should be an integer and starts at 0.
+        visibility:
+          type: boolean
+          description: Define is this element is visible on the portal. Default is true.
+    ModifyElement:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              title: Document
+              properties:
+                status:
+                  type: string
+                  description: 'The new status of the element. Can be one of the predifined status open, waiting, approved,rejected.'
+                  enum:
+                    - open
+                    - waiting
+                    - approved
+                    - rejected
+                reason:
+                  type: string
+                  description: 'If the new status is rejected, you can specify a reason that will be displayed on the portal.'
+                description:
+                  type: string
+                  description: Description of the document that needs to be uploaded
+                nickname:
+                  type: string
+                  description: A nickname for this element. Can be useful to classify your uploaded docs.
+                path:
+                  type: string
+                  description: A path for this element. Can be useful to classify your uploaded docs.
+                mandatory:
+                  type: boolean
+                  description: Is the document mandatory or not. Default is true.
+                extensions:
+                  type: array
+                  description: 'A list of document extensions that are accepted. By default, all type of documents are accepted. Must be formated as a string like [''xls'',''xslx''].'
+                  items:
+                    type: string
+                multipleupload:
+                  type: boolean
+                  description: Specify if you are accepting multi documents for the same element. Default is true.
+              required:
+                - elementId
+        - allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              title: Page                
+        - allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              title: Text
+              properties:
+                text:
+                  type: string
+                  description: A string containing the HTML that you want to display.
+        - allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              title: Form
+        - allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              title: Sign
+    UploadFile:
+      type: object
+      properties:
+        elementId:
+          type: string
+          required: true
+          description: 'ID of the doc element you want to upload the file to'
+        url:
+          type: string
+          description: URL of the remote file. The file size is limited to 20Mb.
+        data:
+          type: string
+          description: Base64 encoded file. The file size is limited to 20Mb.
+        name:
+          type: string
+          required: true
+          description: |
+            Name of the file **with** the file extension.
+    AddElement:
+      oneOf:
+        - allOf:
+            - $ref: '#/components/schemas/CommonElements'
+            - $ref: '#/components/schemas/Docs'
+        - allOf:
+            - $ref: '#/components/schemas/CommonElements'
+            - type: object
+              title: Text
+              properties:
+                name:
+                  type: string
+                  description: 'Name of the text block. This name is not displayed on the portal, it''s only used in your own interface. Default is Text block.'
+                  default: Text block
+                text:
+                  type: string
+                  description: A string containing the HTML that you want to display.
+        - allOf:
+            - $ref: '#/components/schemas/CommonElements'
+            - type: object
+              title: Page
+              properties:
+                name:
+                  type: string
+                  description: 'Name of the page.'
+                  default: New page
+    CommonElements:
+      type: object
+      required:
+        - requestId
+        - type
+      properties:
+        requestId:
+          type: string
+        type:
+          description: 'Type of the element. Can be docs, text and pages.'
+          type: string
+          enum:
+            - docs
+            - text
+            - pages
+        name:
+          description: Name of the element.
+          type: string
+        order:
+          description: Order of the element on the portal. Order should be an integer and starts at 0.
+          type: integer
+          minimum: 0
+    Docs:
+      type: object
+      title: Document
+      properties:
+        description:
+          description: Description of the document that needs to be uploaded.
+          type: string
+        nickname:
+          description: A nickname for this element. Can be useful to classify your uploaded docs.
+          type: string
+        path:
+          description: A path for this element. Can be useful to classify your uploaded docs.
+          type: string
+        mandatory:
+          description: Is the document mandatory or not. Default is true.
+          type: boolean
+        extensions:
+          description: 'A list of document extensions that are accepted. By default, all type of documents are accepted. Must be formated as a string like [''xls'',''xslx''].'
+          type: array
+          items:
+            type: string
+        multipleupload:
+          description: Specify if you are accepting multi documents for the same element. Default is true.
+          type: boolean
+    Element:
+      oneOf:
+        - title: Document
+          type: object
+          properties:
+            id:
+              type: string
+              description: Element ID
+            itemId:
+              type: string
+              description: Reference of the element in the campaign
+            name:
+              type: string
+              description: Element name
+            order:
+              type: integer
+              description: Element order
+            status:
+              type: string
+              description: Element status
+            mandatory:
+              type: boolean
+              description: Whether element is mandatory
+            multipleupload:
+              type: boolean
+              description: Whether multiple uploads are allowed
+            uploads:
+              type: array
+              items:
+                $ref: '#/components/schemas/Upload'
+            type:
+              type: string
+              description: Element type
+            request:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: Request ID
+                campaignId:
+                  type: string
+                  description: Campaign ID
+        - title: Form
+          type: object
+          properties:
+            id:
+              type: string
+              description: Element ID
+            itemId:
+              type: string
+              description: Reference of the element in the campaign
+            name:
+              type: string
+              description: Element name
+            order:
+              type: integer
+              description: Element order
+            status:
+              type: string
+              description: Element status
+            items:
+              type: array
+              description: All the fields of the form
+              items: 
+                type: object
+                properties: 
+                  name: 
+                    type: string
+                    description: Name of the field
+                  type: 
+                    type: string
+                    description: Type of field 
+                  answer: 
+                    type: string
+                    description: Value if there is an answer
+            type:
+              type: string
+              description: Element type
+            request:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: Request ID
+                campaignId:
+                  type: string
+                  description: Campaign ID
+        - title: Sign
+          type: object
+          properties:
+            id:
+              type: string
+              description: Element ID
+            itemId:
+              type: string
+              description: Reference of the element in the campaign
+            name:
+              type: string
+              description: Element name
+            order:
+              type: integer
+              description: Element order
+            status:
+              type: string
+              description: Element status
+            uploads:
+              type: array
+              items:
+                $ref: '#/components/schemas/Upload'
+            type:
+              type: string
+              description: Element type
+            request:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: Request ID
+                campaignId:
+                  type: string
+                  description: Campaign ID
+        - title: Text
+          type: object
+          properties:
+            id:
+              type: string
+              description: Element ID
+            itemId:
+              type: string
+              description: Reference of the element in the campaign
+            name:
+              type: string
+              description: Element name
+            order:
+              type: integer
+              description: Element order
+            text:
+              type: string
+              description: A string containing the HTML that will be displayed on the portal.
+            type:
+              type: string
+              description: Element type
+            request:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: Request ID
+                campaignId:
+                  type: string
+                  description: Campaign ID
+        - title: Page
+          type: object
+          properties:
+            id:
+              type: string
+              description: Element ID
+            itemId:
+              type: string
+              description: Reference of the element in the campaign
+            name:
+              type: string
+              description: Element name
+            order:
+              type: integer
+              description: Element order
+            type:
+              type: string
+              description: Element type
+            request:
+              type: object
+              properties:
+                _id:
+                  type: string
+                  description: Request ID
+                campaignId:
+                  type: string
+                  description: Campaign ID
+    Upload:
+      type: object
+      description: |
+        A document upload within a request. When the upload is downloadable, `url` is present.
+        When the upload is not downloadable (archived, expired, or in quarantine), `url` is omitted.
+        Sensitive documents may include `restricted: true` and still have a `url` with access restrictions.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the upload
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp of when the upload was created
+        name:
+          type: string
+          description: Upload name
+        url:
+          type: string
+          description: |
+            Temporary URL to download the file. Present only when the document is downloadable.
+            Omitted when `status` is `archived` or `expired`, or when the file is in quarantine.
+            Validity period can be set via the `expires` query parameter (default 15 minutes, max 1 hour).
+        status:
+          type: string
+          enum:
+            - archived
+            - expired
+          description: |
+            When present, indicates why the document is not downloadable. `archived` — file has been archived;
+            `expired` — file or link has expired. When `status` is `archived` or `expired`, `url` is not included.
+        size:
+          type: integer
+          description: Upload size in bytes
+        quarantine:
+          type: boolean
+          description: When true, the file failed virus scan or policy check; `url` is not included.
+        restricted:
+          type: boolean
+          description: When true, the document is sensitive and access may be restricted.
+        virusScanned:
+          type: boolean
+          description: Whether the upload has been virus-scanned
+        scannedOn:
+          type: string
+          format: date-time
+          description: Timestamp of the last virus scan
+    DocElement:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Element ID
+        itemId:
+          type: string
+          description: Reference of the element in the campaign
+        name:
+          type: string
+          description: Element name
+        order:
+          type: integer
+          description: Element order
+        status:
+          type: string
+          description: Element status
+        mandatory:
+          type: boolean
+          description: Whether element is mandatory
+        multipleupload:
+          type: boolean
+          description: Whether multiple uploads are allowed
+        uploads:
+          type: array
+          items:
+            $ref: '#/components/schemas/Upload'
+        type:
+          type: string
+          description: Element type
+        request:
+          type: object
+          properties:
+            _id:
+              type: string
+              description: Request ID
+            campaignId:
+              type: string
+              description: Campaign ID
+    CampaignRequest:
+      type: object
+      properties:
+        _id:
+          type: string
+        campaignId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        portalUrl:
+          type: string
+        status:
+          type: string
+        dueDate:
+          type: string
+          format: date-time
+        privacy:
+          type: string
+        contact:
+          $ref: '#/components/schemas/Contact'
+        branding:
+          $ref: '#/components/schemas/Branding'
+    Branding:
+      type: object
+      properties:
+        useBranding:
+          type: boolean
+        brandingId:
+          type: string
+    Contact:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        company:
+          type: string
+        tag:
+          type: array
+          items:
+            type: string
+        custom:
+          $ref: '#/components/schemas/Custom'
+    ContactMultipleRequest:
+      oneOf:
+        - type: string
+          title: Contact Id
+        - type: object
+          title: Contact Object
+          properties:
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+            company:
+              type: string
+            tag:
+              type: array
+              items:
+                type: string
+            customFields:
+              $ref: '#/components/schemas/Custom'
+    ContactMultipleResponse:
+      oneOf:
+        - type: string
+          title: Contact Id
+        - type: object
+          title: Contact Object
+          properties:
+            _id:
+              type: string
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+            tag:
+              type: array
+              items:
+                type: string
+            customFields:
+              $ref: '#/components/schemas/Custom'
+    Custom:
+      type: array
+      items:
+        type: object
+        properties:
+          _id:
+            type: string
+          name:
+            type: string
+          variable:
+            type: string
+          value:
+            type: string
+    SpecificRequest:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Request ID
+        campaignId:
+          type: string
+          description: Campaign ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Request creation date
+        portalUrl:
+          type: string
+          description: URL of the portal for the main contact
+        status:
+          type: string
+          description: Request status
+        dueDate:
+          type: string
+        privacy:
+          type: string
+        contact:
+          $ref: '#/components/schemas/Contact'
+        branding:
+          $ref: '#/components/schemas/Branding'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        forms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Form'
+        texts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Text'
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Page'
+    Message:
+      type: object
+      description: |
+        A message associated with a request. Supports three channels: **internal** (visible in the interface only), **email**, and **sms** (sent to the request's contact).
+        
+        **Internal messages** use `title`, `text`, and `updatedAt`. The `text` field supports markdown; raw HTML is not allowed and content is sanitized to prevent XSS attacks.
+        
+        **Email and SMS messages** use `title` (subject for email), `body`, `status`, and `sendOn`. Possible `status` values include `pending`, `paused`, `sending`, `sent`, `opened`, `clicked`, `creditMissing` (SMS), `phoneError` (SMS).
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message
+          example: msg_123
+        requestId:
+          type: string
+          description: The ID of the request this message belongs to
+          example: req_456
+        channel:
+          type: string
+          enum: [internal, email, sms]
+          description: Message channel. Internal messages are interface-only; email and SMS are sent to the contact.
+        title:
+          type: string
+          description: Title/subject. Used for internal and email; for email must be at least 10 characters. Not used for SMS.
+          example: AI Agent - reply sent
+        text:
+          type: string
+          nullable: true
+          description: |
+            Message content for internal channel only (supports markdown). Can be `null` if no text.
+            Raw HTML is not allowed and all content is sanitized to prevent XSS attacks.
+          example: Here is the response generated by the agent...
+        body:
+          type: string
+          description: Message body for email and SMS channels. Must be at least 20 characters when creating or updating.
+        status:
+          type: string
+          description: For email/SMS only. e.g. pending, paused, sending, sent, opened, clicked, creditMissing, phoneError
+          example: pending
+        sendOn:
+          type: string
+          format: date-time
+          description: For email/SMS only. When the message is (or was) scheduled to be sent (ISO 8601, UTC).
+          example: 2026-02-06T10:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          description: When the message was created (ISO 8601 format, UTC)
+          example: 2026-01-21T10:12:46.120Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the message was last updated (ISO 8601 format, UTC). Present for internal messages.
+          example: 2026-01-21T10:12:46.120Z
+    CampaignDetails:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Campaign ID
+        createdAt:
+          type: string
+          format: date-time
+          description: Campaign creation date
+        status:
+          type: string
+          description: Campaign status
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        forms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Form'
+        texts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Text'
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Page'
+    Text:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Element ID
+        itemId: 
+          type: string
+          description: Reference of the element in the campaign
+        name:
+          type: string
+          description: Text block name
+        order:
+          type: integer
+          description: Element order
+        visibility:
+          type: boolean
+          description: Visibility of the element on the portal
+    Page:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Element ID
+        itemId: 
+          type: string
+          description: Reference of the element in the campaign
+        name:
+          type: string
+          description: Page name
+        order:
+          type: integer
+          description: Element order
+        visibility:
+          type: boolean
+          description: Visibility of the element on the portal
+    Form:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Element ID
+        itemId: 
+          type: string
+          description: Reference of the element in the campaign
+        name:
+          type: string
+          description: Form name
+        order:
+          type: integer
+          description: Element order
+        visibility:
+          type: boolean
+          description: Visibility of the element on the portal
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormItem'
+    FormItem:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Field name
+        type:
+          type: string
+          description: Field type
+        id:
+          type: string
+          description: Field ID
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Element ID
+        itemId: 
+          type: string
+          description: Reference of the element in the campaign
+        name:
+          type: string
+          description: Document name
+        order:
+          type: integer
+          description: Element order
+        visibility:
+          type: boolean
+          description: Visibility of the element on the portal
+        mandatory:
+          type: boolean
+          description: Is document mandatory
+        multipleupload:
+          type: boolean
+          description: Multiple upload allowed
+        extensions:
+          type: array
+          items:
+            type: string
+            description: Document file extension
+    Team:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: YcnS5JKMnG5cA3TXK
+        tz:
+          type: string
+          description: |
+            The timezone associated to your account. We are using IANA time zone format. Ex: `America/New_York` for NYC.
+          example: America/New_York  
+        name:
+          type: string
+          example: Pied Piper
+        plan:
+          $ref: '#/components/schemas/Plan'
+    Campaign:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the campaign
+        name:
+          type: string
+          description: Name of the campaign
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation date of the campaign
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - archived
+          description: Status of the campaign
+        count:
+          $ref: '#/components/schemas/Count'
+    Count:
+      type: object
+      properties:
+        request:
+          type: integer
+          description: Number of request made
+        open:
+          type: integer
+          description: Number of open requests
+        done:
+          type: integer
+          description: Number of done requests
+        due:
+          type: integer
+          description: Number of due requests
+        waiting:
+          type: integer
+          description: Number of requests waiting for validation
+        error:
+          type: integer
+          description: Number of requests with errors
+        message:
+          type: integer
+          description: Number of message requests
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+    Conso:
+      type: object
+      additionalProperties: false
+      properties:
+        request:
+          type: integer
+        sms:
+          type: integer
+        users:
+          type: integer
+        storage:
+          type: integer
+        templates:
+          type: integer
+    Plan:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Business
+        end:
+          type: string
+          format: date-time
+  responses:
+    '400':
+      description: Bad Request -- Your request is invalid.
+    '401':
+      description: Unauthorized -- Your API key is wrong.
+    '403':
+      description: Forbidden -- The object requested is hidden for administrators only.
+    '404':
+      description: Not Found -- The specified object could not be found.
+    '429':
+      description: Too Many Requests -- You're requesting too many objects! Slow down!
+    '500':
+      description: Internal Server Error -- We had a problem with our server. Try again later.
+    '503':
+      description: Service Unavailable -- We're temporarily offline for maintenance. Please try again later.
+  securitySchemes:
+    basicAuth:     # <-- arbitrary name for the security scheme
+      type: http
+      scheme: basic
+      description: |
+        Collect uses API keys to allow access to the API. You can retrieve your Collect API key at the bottom of your [profile page](https://app.usecollect.com/settings/profile).
+        
+        You need to add the Authorization header using the Basic authentication type. `username:password` where the username is always empty and the password is the API key.
+        
+        > info
+        > Don't forget to add the semicolon ( : ) before your API key in curl command.
