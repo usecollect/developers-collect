@@ -257,12 +257,12 @@ paths:
                 documents: 
                   - id: Gwm5sHv6tzikK65We
                     name: ID
-                    order: 0,
+                    order: 0
                     mandatory: false
                     multipleupload: true
                   - id: 4PQd5HKQcBk5BZmsB
                     name: Bank statement
-                    order: 1,
+                    order: 1
                     mandatory: true
                     extensions: [pdf]
                     multipleupload: true    
@@ -797,17 +797,23 @@ paths:
                 - campaignId
                 - contact
             examples:
-              - campaignId: xvr69EYLKXvTkfYuk
-                contact: 
-                  email: erlich.bachman@example.com
-                  firstName: Erlich
-                  lastName: Bachman
-                  company: Bachmanity
-                  data: 
-                    brand: Bachmanity
-                    model: Roadster
-              - campaignId: xvr69EYLKXvTkfYuk
-                contact: WmTjsFknzHdmfs3Ra
+              withContactObject:
+                summary: Using a contact object
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  contact:
+                    email: erlich.bachman@example.com
+                    firstName: Erlich
+                    lastName: Bachman
+                    company: Bachmanity
+                    data:
+                      brand: Bachmanity
+                      model: Roadster
+              withContactId:
+                summary: Using an existing contact ID
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  contact: WmTjsFknzHdmfs3Ra
       responses:
         '200':
           description: List of requests of a campaigns.
@@ -822,7 +828,7 @@ paths:
                     type: array
                     items: {}
               example:
-                request: 
+                request:
                   _id: nw42MmBsJoccgutST
                   campaignId: xvr69EYLKXvTkfYuk
                   createdAt: 2024-07-04T07:20:06.085Z
@@ -972,17 +978,23 @@ paths:
                 - campaignId
                 - contact
             examples:
-              - requestId: xvr69EYLKXvTkfYuk
-                contact: 
-                  email: erlich.bachman@example.com
-                  firstName: Erlich
-                  lastName: Bachman
-                  company: Bachmanity
-                  data: 
-                    brand: Bachmanity
-                    model: Roadster
-              - requestId: xvr69EYLKXvTkfYuk
-                contact: WmTjsFknzHdmfs3Ra
+              withContactObject:
+                summary: Using a contact object
+                value:
+                  requestId: xvr69EYLKXvTkfYuk
+                  contact:
+                    email: erlich.bachman@example.com
+                    firstName: Erlich
+                    lastName: Bachman
+                    company: Bachmanity
+                    data:
+                      brand: Bachmanity
+                      model: Roadster
+              withContactId:
+                summary: Using an existing contact ID
+                value:
+                  requestId: xvr69EYLKXvTkfYuk
+                  contact: WmTjsFknzHdmfs3Ra
       responses:
         '200':
           description: List of requests of a campaigns.
@@ -1054,12 +1066,12 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
+        - in: query
           name: contactId
           description: Specify the ID of the contact to remove.
           schema:
             type: string
-        - in: path
+        - in: query
           name: email
           description: Specify the email of the contact to remove.
           schema:
@@ -1116,7 +1128,10 @@ paths:
               required:
                 - requestId
             examples:
-              - requestId: nw42MmBsJoccgutST
+              default:
+                summary: Trigger sync for a request
+                value:
+                  requestId: nw42MmBsJoccgutST
       responses:
         '200':
           description: Specific Request.
@@ -2114,18 +2129,17 @@ paths:
                 itemId: urRJfPK7CfyGBnHg8
                 name: ID
                 order: 3
-                visibility: true
                 status: open
                 mandatory: true
                 multipleupload: true
-                uploads: 
-                  id: z2A3thsdGaLSidmQq
-                  createdAt: 2024-01-31T06:53:36.472Z
-                  name: whitepaper.pdf
-                  url: https://collectuseast.s3.amazonaws.com/samples/business_plan_acme.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=tS9MixgslTykB6fKE8aFTqArzek%3D
-                  size: 344701
-                  scannedOn: 2024-01-31T06:54:06.639Z
-                  virusScanned: true
+                uploads:
+                  - id: z2A3thsdGaLSidmQq
+                    createdAt: 2024-01-31T06:53:36.472Z
+                    name: whitepaper.pdf
+                    url: https://collectuseast.s3.amazonaws.com/samples/business_plan_acme.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1735689600&Signature=tS9MixgslTykB6fKE8aFTqArzek%3D
+                    size: 344701
+                    scannedOn: 2024-01-31T06:54:06.639Z
+                    virusScanned: true
                 type: docs
                 request:
                   _id: bbbBkrejSaJkHWwDE
@@ -2453,6 +2467,7 @@ paths:
                         - active
                         - paused
             example:
+              targetUrl: https://yourserver.com/collect-hook
               status: paused
       responses:
         '200':
@@ -2638,9 +2653,10 @@ paths:
               email: dinesh.chugtai@example.com
               firstName: Dinesh
               lastName: Chugtai
-              tags: 
-               - Developer
-              customFields: 
+              company: Pied Piper
+              tag:
+                - Developer
+              customFields:
                 - variable: color
                   value: Blue
                 - variable: country
@@ -2789,10 +2805,11 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ModifyContact'
-            example: 
+            example:
               firstName: Richard
               lastName: Hendricks
-              customFields: 
+              company: Pied Piper
+              customFields:
                 - variable: color
                   value: Blue
                 - variable: country
@@ -2913,6 +2930,9 @@ components:
   schemas:
     CreateContact:
       type: object
+      required:
+        - email
+        - company
       properties:
         firstName:
           type: string
@@ -2922,11 +2942,9 @@ components:
           description: Last name of the contact
         email:
           type: string
-          required: true
           description: Email of the contact
         company:
           type: string
-          required: true
           description: Company name of the contact
         tag:
           type: array
@@ -2937,6 +2955,8 @@ components:
           $ref: '#/components/schemas/Custom'
     ModifyContact:
       type: object
+      required:
+        - company
       properties:
         firstName:
           type: string
@@ -2949,7 +2969,6 @@ components:
           description: Email of the contact
         company:
           type: string
-          required: true
           description: Company name of the contact
         tag:
           type: array
@@ -3177,10 +3196,12 @@ components:
               title: Sign
     UploadFile:
       type: object
+      required:
+        - elementId
+        - name
       properties:
         elementId:
           type: string
-          required: true
           description: 'ID of the doc element you want to upload the file to'
         url:
           type: string
@@ -3190,7 +3211,6 @@ components:
           description: Base64 encoded file. The file size is limited to 20Mb.
         name:
           type: string
-          required: true
           description: |
             Name of the file **with** the file extension.
     AddElement:
