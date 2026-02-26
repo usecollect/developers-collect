@@ -161,7 +161,10 @@ paths:
         - Campaigns
       operationId: list-all-campaigns
       summary: List all campaigns
-      description: This endpoint retrieves all the campaigns.
+      description: |
+        This endpoint retrieves all the campaigns.
+
+        **Breaking change:** The default sort order was previously oldest first (createdAtAsc). It is now newest first (createdAtDesc).
       parameters:
         - name: offset
           in: query
@@ -175,15 +178,55 @@ paths:
             type: integer
             default: 50
             maximum: 100
+        - name: sort
+          in: query
+          description: |
+            Controls result ordering. If an invalid value is provided, falls back to createdAtDesc.
+          schema:
+            type: string
+            enum:
+              - createdAtDesc
+              - createdAtAsc
+              - nameAsc
+              - nameDesc
+            default: createdAtDesc
+        - name: search
+          in: query
+          description: 'Case-insensitive partial match on campaign name. Example: search=onboarding matches "Client Onboarding Q1", "onboarding-2024", etc.'
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: |
+            Filters campaigns by status. If omitted, falls back to the showArchives parameter behavior (default is only open campaigns).
+            showArchives=true is equivalent to status=all and remains supported for backward compatibility.
+            Note: status=archived corresponds to the internal DB status closed.
+          schema:
+            type: string
+            enum:
+              - open
+              - archived
+              - all
         - name: showArchives
           in: query
-          description: Specify if the archived campaigns should be included or not. Default is false.
+          deprecated: true
+          description: |
+            Specify if archived campaigns should be included. Default is false (only open). Use status=all instead for the same behavior as showArchives=true.
+            Kept for backward compatibility.
           schema:
             type: boolean
             default: false
       responses:
         '200':
           description: List of campaigns.
+          headers:
+            X-Total-Count:
+              description: |
+                Total number of campaigns matching the query, across all pages (ignores offset/limit). Use this to implement pagination.
+                The header is exposed via Access-Control-Expose-Headers so browser clients can read it. Response body format is unchanged (plain array).
+              schema:
+                type: integer
+                example: 150
           content:
             application/json:
               schema:
@@ -307,13 +350,15 @@ paths:
       tags:
         - Requests
       operationId: list-all-the-requests-of-a-campaign
-      summary: List all the requests of a campaign
-      description: This endpoint retrieves all the requests of a campaign.
+      summary: List requests
+      description: |
+        Returns requests, optionally scoped to a single campaign. If campaignId is omitted, returns requests across all campaigns the user has access to.
+        Results are ordered by creation date (newest first) by default. Previously, no guaranteed sort order was documented.
       parameters:
         - name: campaignId
           in: query
-          required: true
-          description: Specify the ID of the campaign to retrieve.
+          required: false
+          description: Optional. Campaign ID to scope results to. If omitted, returns requests from all campaigns the user has access to.
           schema:
             type: string
           example: mYCsdgB4DQoENBaX6
@@ -325,12 +370,44 @@ paths:
           example: 0
         - name: limit
           in: query
-          description: 'Specify how many results to return. Default is 50 campaigns, maximum is 100 campaigns.'
+          description: 'Specify how many results to return. Default is 50, maximum is 100.'
           schema:
             type: integer
             default: 50
             maximum: 100
           example: 25
+        - name: sort
+          in: query
+          description: |
+            Controls result ordering. If an invalid value is provided, falls back to createdAtDesc.
+          schema:
+            type: string
+            enum:
+              - createdAtDesc
+              - createdAtAsc
+              - dueDateAsc
+              - dueDateDesc
+            default: createdAtDesc
+        - name: assignedTo
+          in: query
+          description: Filter requests by the assigned team member. Value must be a user ID.
+          schema:
+            type: string
+          example: abc123
+        - name: dueBefore
+          in: query
+          description: Return only requests with a due date on or before this date (ISO 8601).
+          schema:
+            type: string
+            format: date-time
+          example: "2026-03-01T00:00:00Z"
+        - name: dueAfter
+          in: query
+          description: Return only requests with a due date on or after this date (ISO 8601). Can be combined with dueBefore for a date range.
+          schema:
+            type: string
+            format: date-time
+          example: "2026-02-01T00:00:00Z"
         - name: filter
           in: query
           description: | 
@@ -363,6 +440,14 @@ paths:
       responses:
         '200':
           description: List of requests of a campaigns.
+          headers:
+            X-Total-Count:
+              description: |
+                Total number of requests matching the query, across all pages (ignores offset/limit). Use this to implement pagination.
+                The header is exposed via Access-Control-Expose-Headers so browser clients can read it. Response body format is unchanged (plain array).
+              schema:
+                type: integer
+                example: 150
           content:
             application/json:
               schema:
@@ -2574,6 +2659,8 @@ paths:
               - emDesc
               - tagAsc
               - tagDesc
+              - createdAtAsc
+              - createdAtDesc
           required: false
         - in: query
           name: search
@@ -2602,6 +2689,14 @@ paths:
       responses:
         '200':
           description: Success
+          headers:
+            X-Total-Count:
+              description: |
+                Total number of contacts matching the query, across all pages (ignores offset/limit). Use this to implement pagination.
+                The header is exposed via Access-Control-Expose-Headers so browser clients can read it. Response body format is unchanged (plain array).
+              schema:
+                type: integer
+                example: 150
           content:
             application/json:
               schema:
