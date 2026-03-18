@@ -518,7 +518,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/ContactMultipleRequest'
                   description: | 
-                    An array of the contacts you want to send the request to. You can send requests up to 50 contacts per API call (considering your account's limitation). Each contact can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact))
+                    An array of the contacts you want to send the request to. You can send requests up to 50 contacts per API call (considering your account's limitation). Each contact can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](#/components/schemas/ContactMultipleRequest))
                 items:
                   description: ' An array of itemId. If you want to request only few items (documents and forms) of the campaign, you can optionaly specify which items you want to retrieve.'
                   type: array
@@ -783,7 +783,7 @@ paths:
                   description: The ID of the campaign you want to use to send a request.
                 contact:
                   description: |
-                    The contact can be a string representing the ID of an existing contact or a contact object in JSON format ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact)).
+                    The contact can be a string representing the ID of an existing contact or a contact object in JSON format ([click here for more details](#/components/schemas/ContactMultipleRequest)).
                   $ref: '#/components/schemas/ContactMultipleRequest'
                 items:
                   description: 'An array of itemId. If you want to request only few elements of the campaign, you can optionaly specify which elements you want to include in your request.'
@@ -810,6 +810,9 @@ paths:
                       url:
                         type: string
                         description: URL of the remote file to sign
+                      appendix:
+                        type: boolean
+                        description: If true, only the signature is merged with the document; variables are not merged.
                       data:
                         type: string
                         description: Base64 encoded file
@@ -827,6 +830,9 @@ paths:
                           url:
                             type: string
                             description: URL of the remote file to sign
+                          appendix:
+                            type: boolean
+                            description: If true, only the signature is merged with the document; variables are not merged.
                       - title: Base64 Data
                         type: object
                         required: [itemId, name, data]
@@ -840,6 +846,9 @@ paths:
                           data:
                             type: string
                             description: Base64 encoded file
+                          appendix:
+                            type: boolean
+                            description: If true, only the signature is merged with the document; variables are not merged.
                 esignTriggers:
                   type: array
                   description: Array of sign element IDs that should be triggered for signature immediately after the request is created
@@ -891,9 +900,10 @@ paths:
                     firstName: Erlich
                     lastName: Bachman
                     company: Bachmanity
-                    data:
-                      brand: Bachmanity
-                      model: Roadster
+                    phone: "+14155551234"
+                  data:
+                    brand: Bachmanity
+                    model: Roadster
               withContactId:
                 summary: Using an existing contact ID
                 value:
@@ -1057,7 +1067,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/ContactMultipleRequest'
                   description: | 
-                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](https://bump.sh/adelivet/doc/collectdraft/operation/operation-add-contact))
+                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](#/components/schemas/ContactMultipleRequest))
                   type: array
               required:
                 - campaignId
@@ -1072,9 +1082,10 @@ paths:
                     firstName: Erlich
                     lastName: Bachman
                     company: Bachmanity
-                    data:
-                      brand: Bachmanity
-                      model: Roadster
+                    phone: "+14155551234"
+                  data:
+                    brand: Bachmanity
+                    model: Roadster
               withContactId:
                 summary: Using an existing contact ID
                 value:
@@ -3711,6 +3722,9 @@ components:
               type: string
             company:
               type: string
+            phone:
+              type: string
+              description: Phone number in international format (e.g. +33612345678), no spaces.
             tag:
               type: array
               items:
