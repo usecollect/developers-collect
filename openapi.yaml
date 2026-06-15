@@ -518,7 +518,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/ContactMultipleRequest'
                   description: | 
-                    An array of the contacts you want to send the request to. You can send requests up to 50 contacts per API call (considering your account's limitation). Each contact can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](#/components/schemas/ContactMultipleRequest))
+                    An array of the contacts you want to send the request to. You can send requests up to 50 contacts per API call (considering your account's limitation). Each contact can be a string representing the ID of an existing contact or a contact object in JSON format.
                 items:
                   description: ' An array of itemId. If you want to request only few items (documents and forms) of the campaign, you can optionaly specify which items you want to retrieve.'
                   type: array
@@ -771,7 +771,12 @@ paths:
         - Requests
       operationId: send-a-new-request
       summary: Send a new request
-      description: This endpoint allows you to send a new request to a new contact or to an existing contact.
+      description: |
+        This endpoint allows you to send a new request to a new contact or to an existing contact.
+
+        Instead of `contact`, you can pass a `crm` object to link the request directly to a HubSpot or Pipedrive CRM object (contact, company, deal, etc.) - the same way the CRM card and embedded UI do. The recipient contact is then resolved automatically from that CRM object, and the `contact` field in the response reflects this resolved contact.
+
+        Provide either `contact` or `crm`, but not both. If both are missing, the API returns a 400 error.
       requestBody:
         content:
           application/json:
@@ -783,8 +788,16 @@ paths:
                   description: The ID of the campaign you want to use to send a request.
                 contact:
                   description: |
-                    The contact can be a string representing the ID of an existing contact or a contact object in JSON format ([click here for more details](#/components/schemas/ContactMultipleRequest)).
+                    The contact can be a string representing the ID of an existing contact or a contact object in JSON format.
+
+                    Provide either `contact` or `crm`, but not both.
                   $ref: '#/components/schemas/ContactMultipleRequest'
+                crm:
+                  description: |
+                    Links the request to a HubSpot or Pipedrive CRM object instead of a contact.
+
+                    Provide either `contact` or `crm`, but not both.
+                  $ref: '#/components/schemas/CrmObject'
                 items:
                   description: 'An array of itemId. If you want to request only few elements of the campaign, you can optionaly specify which elements you want to include in your request.'
                   type: array
@@ -856,7 +869,10 @@ paths:
                     type: string
                     description: ID of sign element that should be triggered for signature immediately after the request is created
                 data:
-                  description: An object with custom data that you want to use in your request.
+                  description: |
+                    An object with custom data that you want to use in your request.
+
+                    When used together with `crm`, this object is merged into the CRM payload as `dataCustom`.
                   type: object
                 sample:
                   description: 'An object that represents the sample of a document element. The object must contain 2 parameters: ''itemId'' and ''url''.'
@@ -889,7 +905,6 @@ paths:
                   type: boolean
               required:
                 - campaignId
-                - contact
             examples:
               withContactObject:
                 summary: Using a contact object
@@ -909,6 +924,36 @@ paths:
                 value:
                   campaignId: xvr69EYLKXvTkfYuk
                   contact: WmTjsFknzHdmfs3Ra
+              withCrmHubspotDeal:
+                summary: Linking to a HubSpot deal (with contact)
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  crm:
+                    source: hubspot
+                    type: deal
+                    objectId: "12345"
+                    contactId: "67890"
+                  data:
+                    deal_value: 50000
+              withCrmHubspotContact:
+                summary: Linking directly to a HubSpot contact
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  crm:
+                    source: hubspot
+                    type: contact
+                    objectId: "67890"
+              withCrmPipedriveDeal:
+                summary: Linking to a Pipedrive deal (with contact)
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  crm:
+                    source: pipedrive
+                    type: deal
+                    objectId: "12345"
+                    contactId: "67890"
+                  data:
+                    deal_value: 50000
       responses:
         '200':
           description: List of requests of a campaigns.
@@ -1067,7 +1112,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/ContactMultipleRequest'
                   description: | 
-                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format. ([click here for more details](#/components/schemas/ContactMultipleRequest))
+                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format.
                   type: array
               required:
                 - campaignId
@@ -3753,6 +3798,72 @@ components:
                 type: string
             customFields:
               $ref: '#/components/schemas/Custom'
+    CrmObject:
+      description: |
+        Links the request directly to a CRM object (HubSpot or Pipedrive) instead of a Collect contact. Provide either `contact` or `crm`, but not both.
+
+        The recipient contact is resolved automatically from the CRM object (an existing Collect contact is matched, or a new one is created, using the email/name/phone/company found on the CRM record).
+
+        When `crm` is used, any top-level `data` you send is merged into the CRM payload as `dataCustom`, and the request is created with `createdSource` set to `hubspot` or `pipedrive` (matching `crm.source`) so it behaves as if it originated from the CRM integration.
+      oneOf:
+        - title: HubSpot
+          type: object
+          required:
+            - source
+            - type
+            - objectId
+          properties:
+            source:
+              type: string
+              enum:
+                - hubspot
+              description: The CRM provider.
+            type:
+              type: string
+              enum:
+                - contact
+                - company
+                - deal
+                - ticket
+                - project
+              description: The type of HubSpot object to link the request to.
+            objectId:
+              type: string
+              description: The ID of the HubSpot object (contact, company, deal, ticket, or project).
+            contactId:
+              type: string
+              description: |
+                The ID of the HubSpot contact to send the request to.
+
+                Required when `type` is not `contact` and the HubSpot object has more than one associated contact. If omitted in that case, the API returns a 400 error: "Multiple HubSpot contacts associated; provide crm.contactId".
+        - title: Pipedrive
+          type: object
+          required:
+            - source
+            - type
+            - objectId
+          properties:
+            source:
+              type: string
+              enum:
+                - pipedrive
+              description: The CRM provider.
+            type:
+              type: string
+              enum:
+                - contact
+                - company
+                - deal
+              description: The type of Pipedrive object to link the request to.
+            objectId:
+              type: string
+              description: The ID of the Pipedrive object (contact, company, or deal).
+            contactId:
+              type: string
+              description: |
+                The ID of the Pipedrive contact (person) to send the request to.
+
+                Required when `type` is `deal` or `company`, since Pipedrive does not automatically determine a contact for these object types.
     Custom:
       type: array
       items:
