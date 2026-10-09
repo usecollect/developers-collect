@@ -1720,7 +1720,7 @@ paths:
       summary: Export request in PDF
       description: |
         Generate a collated PDF for a given request and get a temporary download URL.
-        **Authentication:** Same as the rest of the API (API key e.g. `Authorization: Basic <base64(apiKey:)>` or `?api_key=...`, or OAuth Bearer token). The authenticated user must have **requests-download** permission for the request.
+        **Authentication:** Same as the rest of the API (API key with an empty username and the key as password, e.g. `Authorization: Basic <base64(:apiKey)>` or `?api_key=...`, or OAuth Bearer token). The authenticated user must have **requests-download** permission for the request.
         **Default export (templateId omitted):** All uploaded documents for that request, in item order. Forms are not included.
         **Custom template (templateId set):** Export follows the template (documents, static pages, PDFs, forms, order, "do not include if form has no answers", etc.). Template IDs are shown in the app in "Manage your PDF exports" (list and in the template detail modal when editing).
         The client should use the returned `url` with a simple GET (e.g. redirect or fetch) to download the PDF. The link is valid for 15 minutes; after that a new export must be requested.
@@ -4206,7 +4206,7 @@ components:
     '400':
       description: Bad Request -- Your request is invalid.
     '401':
-      description: Unauthorized -- Your API key is wrong.
+      description: Unauthorized -- Your API key is wrong or missing. Make sure you use Basic authentication with an empty username and your API key as the password (`:YOUR_API_KEY`).
     '403':
       description: Forbidden -- The object requested is hidden for administrators only.
     '404':
@@ -4224,7 +4224,28 @@ components:
       description: |
         Collect uses API keys to allow access to the API. You can retrieve your Collect API key at the bottom of your [profile page](https://app.usecollect.com/settings/profile).
         
-        You need to add the Authorization header using the Basic authentication type. `username:password` where the username is always empty and the password is the API key.
+        The API uses HTTP Basic authentication, with the credentials in the form `username:password`:
+        
+        - **Username:** leave it **empty**. The Collect API does not use a username.
+        - **Password:** your API key.
+        
+        The credentials you authenticate with are therefore `:YOUR_API_KEY`, a colon followed directly by your API key, with nothing before the colon.
+        
+        The `Authorization` header is `Basic <base64(":YOUR_API_KEY")>`.
+        
+        **curl example**
+        
+        ```bash
+        curl https://api.usecollect.com/v1/team \
+          -u ":YOUR_API_KEY"
+        ```
+        
+        **Equivalent raw header**
+        
+        ```bash
+        curl https://api.usecollect.com/v1/team \
+          -H "Authorization: Basic $(printf ':YOUR_API_KEY' | base64)"
+        ```
         
         > info
-        > Don't forget to add the semicolon ( : ) before your API key in curl command.
+        > Don't forget the colon ( : ) before your API key. Without it, curl treats your API key as the username and prompts for a password, and the request is rejected with a `401`.

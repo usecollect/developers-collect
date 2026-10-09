@@ -178,7 +178,7 @@
     })
 
     // Build the AI prompt with full API context
-    const aiPrompt = `I'm working with the Collect API (https://api.usecollect.com/v1). It uses HTTP Basic Auth with an API key. The API has these resources: Teams, Users, Campaigns, Requests (with messages, contributors, document sync, PDF export), Elements (documents, forms, e-signatures), Contacts, and Webhooks. Help me integrate with this API.`
+    const aiPrompt = `I'm working with the Collect API (https://api.usecollect.com/v1). It uses HTTP Basic Auth with an empty username and the API key as the password (credentials are \`:API_KEY\`, e.g. curl -u ":API_KEY"). The API has these resources: Teams, Users, Campaigns, Requests (with messages, contributors, document sync, PDF export), Elements (documents, forms, e-signatures), Contacts, and Webhooks. Help me integrate with this API.`
     const encodedPrompt = encodeURIComponent(aiPrompt)
 
     const aiTargets = [
