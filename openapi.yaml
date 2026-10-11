@@ -2006,7 +2006,7 @@ paths:
         - Elements
       operationId: add-an-element
       summary: Add an element
-      description: 'This endpoint allows you to add an element to an existing request. You can currently add docs, text and pages. form will come later.'
+      description: 'This endpoint allows you to add an element to an existing request. Choose the kind of element with the `type` field: `docs` (document to upload), `text` (text block) or `pages` (page). Forms and e-signatures can''t be added through the API yet.'
       requestBody:
         content:
           application/json:
@@ -2028,7 +2028,7 @@ paths:
               Page:
                 value:
                   requestId: GTonevwqoPPJ2PYEy
-                  type: page
+                  type: pages
                   order: 2
                   name: More details
       responses:
@@ -3286,11 +3286,13 @@ components:
           type: boolean
           description: Define is this element is visible on the portal. Default is true.
     ModifyElement:
+      description: |
+        The fields you can modify depend on the type of the element identified by `elementId`.
       oneOf:
-        - allOf:
+        - title: 'Document (element of type docs)'
+          allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
             - type: object
-              title: Document
               properties:
                 status:
                   type: string
@@ -3325,26 +3327,23 @@ components:
                   description: Specify if you are accepting multi documents for the same element. Default is true.
               required:
                 - elementId
-        - allOf:
+        - title: 'Page (element of type pages)'
+          allOf:
+            - $ref: '#/components/schemas/ModifyCommonElements'
+        - title: 'Text (element of type text)'
+          allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
             - type: object
-              title: Page                
-        - allOf:
-            - $ref: '#/components/schemas/ModifyCommonElements'
-            - type: object
-              title: Text
               properties:
                 text:
                   type: string
                   description: A string containing the HTML that you want to display.
-        - allOf:
+        - title: 'Form (element of type form)'
+          allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
-            - type: object
-              title: Form
-        - allOf:
+        - title: 'Sign (element of type sign)'
+          allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
-            - type: object
-              title: Sign
     UploadFile:
       type: object
       required:
@@ -3365,31 +3364,70 @@ components:
           description: |
             Name of the file **with** the file extension.
     AddElement:
+      description: |
+        The body depends on the kind of element you want to add. Set the `type` field to choose it:
+
+        - `docs`: a document the contributor has to upload.
+        - `text`: a text block (HTML) displayed on the portal.
+        - `pages`: a page that groups elements on the portal.
       oneOf:
-        - allOf:
-            - $ref: '#/components/schemas/CommonElements'
-            - $ref: '#/components/schemas/Docs'
-        - allOf:
-            - $ref: '#/components/schemas/CommonElements'
-            - type: object
-              title: Text
-              properties:
-                name:
-                  type: string
-                  description: 'Name of the text block. This name is not displayed on the portal, it''s only used in your own interface. Default is Text block.'
-                  default: Text block
-                text:
-                  type: string
-                  description: A string containing the HTML that you want to display.
-        - allOf:
-            - $ref: '#/components/schemas/CommonElements'
-            - type: object
-              title: Page
-              properties:
-                name:
-                  type: string
-                  description: 'Name of the page.'
-                  default: New page
+        - $ref: '#/components/schemas/AddDocumentElement'
+        - $ref: '#/components/schemas/AddTextElement'
+        - $ref: '#/components/schemas/AddPageElement'
+      discriminator:
+        propertyName: type
+        mapping:
+          docs: '#/components/schemas/AddDocumentElement'
+          text: '#/components/schemas/AddTextElement'
+          pages: '#/components/schemas/AddPageElement'
+    AddDocumentElement:
+      title: 'Document (type = docs)'
+      description: Add a document that the contributor has to upload. Use `type` set to `docs`.
+      allOf:
+        - $ref: '#/components/schemas/CommonElements'
+        - $ref: '#/components/schemas/Docs'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: 'Type of the element. Must be `docs` to add a document.'
+              enum:
+                - docs
+    AddTextElement:
+      title: 'Text (type = text)'
+      description: Add a text block displayed on the portal. Use `type` set to `text`.
+      allOf:
+        - $ref: '#/components/schemas/CommonElements'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: 'Type of the element. Must be `text` to add a text block.'
+              enum:
+                - text
+            name:
+              type: string
+              description: 'Name of the text block. This name is not displayed on the portal, it''s only used in your own interface. Default is Text block.'
+              default: Text block
+            text:
+              type: string
+              description: A string containing the HTML that you want to display.
+    AddPageElement:
+      title: 'Page (type = pages)'
+      description: Add a page on the portal. Use `type` set to `pages`.
+      allOf:
+        - $ref: '#/components/schemas/CommonElements'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: 'Type of the element. Must be `pages` to add a page.'
+              enum:
+                - pages
+            name:
+              type: string
+              description: 'Name of the page.'
+              default: New page
     CommonElements:
       type: object
       required:
@@ -3399,7 +3437,7 @@ components:
         requestId:
           type: string
         type:
-          description: 'Type of the element. Can be docs, text and pages.'
+          description: 'Type of the element: `docs` (document to upload), `text` (text block) or `pages` (page).'
           type: string
           enum:
             - docs
@@ -3414,7 +3452,6 @@ components:
           minimum: 0
     Docs:
       type: object
-      title: Document
       properties:
         description:
           description: Description of the document that needs to be uploaded.
@@ -4222,11 +4259,13 @@ components:
       type: http
       scheme: basic
       description: |
+        **Leave Username empty. Enter your API key as the Password.**
+        
         Collect uses API keys to allow access to the API. You can retrieve your Collect API key at the bottom of your [profile page](https://app.usecollect.com/settings/profile).
         
         The API uses HTTP Basic authentication, with the credentials in the form `username:password`:
         
-        - **Username:** leave it **empty**. The Collect API does not use a username.
+        - **Username:** leave it **empty**, even though the form marks it as required. The Collect API does not use a username.
         - **Password:** your API key.
         
         The credentials you authenticate with are therefore `:YOUR_API_KEY`, a colon followed directly by your API key, with nothing before the colon.
