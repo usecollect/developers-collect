@@ -2110,7 +2110,7 @@ paths:
                   reason: The document is not readable
               Form:
                 value:
-                  requestId: 2ewEw5L6amQiJ6J2A
+                  elementId: 2ewEw5L6amQiJ6J2A
                   status: approved
                   visibility: false
               Sign:
@@ -3341,6 +3341,19 @@ components:
         - title: 'Form (element of type form)'
           allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
+            - type: object
+              properties:
+                status:
+                  type: string
+                  description: 'The new status of the element. Can be one of the predifined status open, waiting, approved,rejected.'
+                  enum:
+                    - open
+                    - waiting
+                    - approved
+                    - rejected
+                reason:
+                  type: string
+                  description: 'If the new status is rejected, you can specify a reason that will be displayed on the portal.'
         - title: 'Sign (element of type sign)'
           allOf:
             - $ref: '#/components/schemas/ModifyCommonElements'
