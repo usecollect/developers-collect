@@ -278,7 +278,10 @@ paths:
         - Campaigns
       operationId: get-specific-campaign
       summary: Get a specific campaign
-      description: Retrieve all the details of a specific campaign.
+      description: |
+        Retrieve all the details of a specific campaign.
+
+        If the campaign defines contact placeholders (e.g. "Signer 2"), they are returned in `placeholders` with their `id` and `name`. You can then fill them when you send a request.
       parameters:
         - name: campaignId
           in: path
@@ -648,6 +651,8 @@ paths:
       description: |
         This endpoint retrieves all the details of a specific request including the answers of the forms and the documents that have been uploaded.
 
+        **Contact placeholders:** If the campaign defines contact placeholders (e.g. "Signer 2"), `placeholders` lists each of them with the contacts filling it on this request.
+
         **Document uploads:** Each document in `documents[].uploads[]` includes `id`, `name`, `createdAt`, and other metadata. When an upload is downloadable, a temporary `url` is provided. When an upload is not downloadable (e.g. archived or expired), it still appears in the list with `status` set to `archived` or `expired` and **no `url` field** — the document cannot be downloaded via the API in those cases. Uploads in quarantine also omit `url`.
       parameters:
         - name: requestId
@@ -777,6 +782,8 @@ paths:
         Instead of `contact`, you can pass a `crm` object to link the request directly to a HubSpot or Pipedrive CRM object (contact, company, deal, etc.) - the same way the CRM card and embedded UI do. The recipient contact is then resolved automatically from that CRM object, and the `contact` field in the response reflects this resolved contact.
 
         Provide either `contact` or `crm`, but not both. If both are missing, the API returns a 400 error.
+
+        **Contact placeholders:** If your campaign uses contact placeholders (e.g. "Signer 2"), use `placeholders` to say which contacts fill them. The mapping is in place before any e-signature is sent. Unknown placeholders are rejected with a `400` and nothing is created. See [Get request placeholders](#tag/requests/GET/requests/{requestId}/placeholders) to edit them later.
       requestBody:
         content:
           application/json:
@@ -798,6 +805,21 @@ paths:
 
                     Provide either `contact` or `crm`, but not both.
                   $ref: '#/components/schemas/CrmObject'
+                placeholders:
+                  type: object
+                  description: |
+                    Contacts filling the contact placeholders of the campaign. Each key is a placeholder `id` or `name` (case-insensitive), each value is an array of contacts (contact ID, `{contactId}` or contact object). You can set up to 10 contacts per call.
+
+                    The main contact (`contact`) is not a placeholder and never needs a mapping. Contacts that are not yet on the request are added as contributors.
+                  additionalProperties:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlaceholderContactEntry'
+                  example:
+                    Signer 2:
+                      - WmTjsFknzHdmfs3Ra
+                      - email: jo@acme.com
+                        firstName: Jo
                 items:
                   description: 'An array of itemId. If you want to request only few elements of the campaign, you can optionaly specify which elements you want to include in your request.'
                   type: array
@@ -954,6 +976,16 @@ paths:
                     contactId: "67890"
                   data:
                     deal_value: 50000
+              withPlaceholders:
+                summary: Filling the contact placeholders of the campaign
+                value:
+                  campaignId: xvr69EYLKXvTkfYuk
+                  contact: WmTjsFknzHdmfs3Ra
+                  placeholders:
+                    Signer 2:
+                      - xtPWKQqcAk8MJfoz5
+                      - email: jo@acme.com
+                        firstName: Jo
       responses:
         '200':
           description: List of requests of a campaigns.
@@ -1098,7 +1130,12 @@ paths:
         - Requests
       operationId: add-a-contributor
       summary: Add a contributor
-      description: This endpoint allows you to add new contacts or existing contacts as contributors of a request.
+      description: |
+        This endpoint allows you to add new contacts or existing contacts as contributors of a request.
+
+        **Contact placeholders:** Use `placeholders` to also assign these contacts to the contact placeholders of the campaign (e.g. "Signer 2"). Set it at the top level to apply it to every contact of the call, or on a contact entry to apply it to this contact only. With `placeholders`, a contact object whose email already exists reuses that contact (without it, you still get the usual "already exists" error).
+
+        Placeholders are validated before anything is created: an unknown placeholder returns a `400` and nothing is written. A placeholder used by a signer whose e-signature envelope has already been created can no longer be changed and returns a `409`.
       requestBody:
         content:
           application/json:
@@ -1110,13 +1147,17 @@ paths:
                   description: The ID of the request you want to add the contributor to.
                 contacts:
                   items:
-                    $ref: '#/components/schemas/ContactMultipleRequest'
+                    $ref: '#/components/schemas/ContributorEntry'
                   description: | 
-                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format.
+                    An array of the contributors you want to add to the request. You can add up to 10 contributors per API cal. Each contributors can be a string representing the ID of an existing contact or a contact object in JSON format. An entry can carry its own `placeholders`.
                   type: array
+                placeholders:
+                  description: |
+                    Optional. Contact placeholders (id or name) filled by every contact of this call.
+                  allOf:
+                    - $ref: '#/components/schemas/PlaceholderRefs'
               required:
-                - campaignId
-                - contact
+                - requestId
             examples:
               withContactObject:
                 summary: Using a contact object
@@ -1136,6 +1177,15 @@ paths:
                 value:
                   requestId: xvr69EYLKXvTkfYuk
                   contact: WmTjsFknzHdmfs3Ra
+              withPlaceholders:
+                summary: Adding contributors to contact placeholders
+                value:
+                  requestId: xvr69EYLKXvTkfYuk
+                  placeholders: Witness
+                  contacts:
+                    - email: jo@acme.com
+                      placeholders: [Signer 2]
+                    - WmTjsFknzHdmfs3Ra
       responses:
         '200':
           description: List of requests of a campaigns.
@@ -1183,6 +1233,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          description: Conflict -- A placeholder is used by a signer whose e-signature envelope has already been created. It can no longer be changed.
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -1197,6 +1249,8 @@ paths:
       summary: Remove a contributor
       description: |
         This endpoint remove an existing contributor from a request. You need to specify the contactId or the email of the contact. It returns an object with the requestId and the contactId.
+
+        The contributor is also removed from the contact placeholders of the request.
 
         > error
         > This action can't be cancelled. Use it at your own risk.
@@ -1244,6 +1298,264 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}/placeholders':
+    get:
+      tags:
+        - Requests
+      operationId: list-request-placeholders
+      summary: List request placeholders
+      description: |
+        A campaign can define contact placeholders (e.g. "Signer 2"), used to assign elements or e-signature signers. On a request, each placeholder is filled by one or more contacts of the request.
+
+        This endpoint lists the placeholders of a request and the contacts filling each of them.
+
+        The **main contact** is the contact of the request. It is not a placeholder and never needs a mapping.
+
+        A placeholder is referenced by its `id` or by its `name` (case-insensitive). If several placeholders have the same name, use the `id`.
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          description: The ID of the request.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Placeholders of the request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  placeholders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RequestPlaceholder'
+              example:
+                placeholders:
+                  - id: 8WcX2fLq9bTn4YzPd
+                    name: Signer 2
+                    contacts:
+                      - _id: WmTjsFknzHdmfs3Ra
+                        email: jo@acme.com
+                        firstName: Jo
+                        lastName: Smith
+                  - id: Rk7vHn3QpZs5LmYw2
+                    name: Witness
+                    contacts: []
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+  '/requests/{requestId}/placeholders/{placeholderId}':
+    post:
+      tags:
+        - Requests
+      operationId: add-contacts-to-request-placeholder
+      summary: Add contacts to a placeholder
+      description: |
+        This endpoint adds contacts to a placeholder of a request. Contacts already in the placeholder are kept.
+
+        Each contact can be the ID of an existing contact, a `{contactId}` object or a contact object. Contacts that are not yet on the request are added as contributors. A contact object whose email already exists reuses the existing contact.
+
+        The valid contacts are added. The ones that could not be added are listed in `errors`.
+
+        You need the permission to assign contacts on the request.
+
+        > info
+        > You can add up to 10 contacts per API call.
+      parameters:
+        - $ref: '#/components/parameters/PlaceholderRequestId'
+        - $ref: '#/components/parameters/PlaceholderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceholderContactsBody'
+            example:
+              contacts:
+                - WmTjsFknzHdmfs3Ra
+                - email: jo@acme.com
+                  firstName: Jo
+      responses:
+        '200':
+          description: The placeholder with its contacts, and the contacts that could not be added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceholderResult'
+              example:
+                placeholder:
+                  id: 8WcX2fLq9bTn4YzPd
+                  name: Signer 2
+                  contacts:
+                    - _id: WmTjsFknzHdmfs3Ra
+                      email: jo@acme.com
+                      firstName: Jo
+                      lastName: Smith
+                errors: []
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          description: Not found -- Unknown request, or unknown placeholder. The message lists the available placeholders.
+        '409':
+          $ref: '#/components/responses/PlaceholderLocked'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    put:
+      tags:
+        - Requests
+      operationId: replace-contacts-of-request-placeholder
+      summary: Replace the contacts of a placeholder
+      description: |
+        This endpoint replaces all the contacts of a placeholder of a request. Send an empty `contacts` array to clear the placeholder.
+
+        Contacts follow the same format as when you add contacts to a placeholder.
+
+        The replacement is all or nothing: if some contacts are not valid, nothing is changed, the API returns a `400` and the invalid contacts are listed in `errors`.
+
+        You need the permission to assign contacts on the request.
+
+        > info
+        > You can set up to 10 contacts per API call.
+      parameters:
+        - $ref: '#/components/parameters/PlaceholderRequestId'
+        - $ref: '#/components/parameters/PlaceholderId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceholderContactsBody'
+            examples:
+              replace:
+                summary: Replace the contacts
+                value:
+                  contacts:
+                    - WmTjsFknzHdmfs3Ra
+              clear:
+                summary: Clear the placeholder
+                value:
+                  contacts: []
+      responses:
+        '200':
+          description: The placeholder with its new contacts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceholderResult'
+              example:
+                placeholder:
+                  id: 8WcX2fLq9bTn4YzPd
+                  name: Signer 2
+                  contacts:
+                    - _id: WmTjsFknzHdmfs3Ra
+                      email: jo@acme.com
+                      firstName: Jo
+                      lastName: Smith
+                errors: []
+        '400':
+          description: Bad request -- `contacts` is not an array, there are more than 10 contacts, or some contacts are not valid (nothing was changed, the invalid contacts are listed in `errors`).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Bad request. Nothing was changed because some contacts are not valid.
+                  errors:
+                    $ref: '#/components/schemas/PlaceholderContactErrors'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          description: Not found -- Unknown request, or unknown placeholder. The message lists the available placeholders.
+        '409':
+          $ref: '#/components/responses/PlaceholderLocked'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        '503':
+          $ref: '#/components/responses/503'
+    delete:
+      tags:
+        - Requests
+      operationId: remove-contacts-from-request-placeholder
+      summary: Remove contacts from a placeholder
+      description: |
+        This endpoint removes one contact from a placeholder of a request. Specify the `contactId` or the `email` of the contact. If you specify neither, the placeholder is cleared.
+
+        The contact stays on the request as a contributor. To remove it from the request, use [Remove a contributor](#tag/requests/DELETE/contributors/{requestId}).
+
+        You need the permission to assign contacts on the request.
+      parameters:
+        - $ref: '#/components/parameters/PlaceholderRequestId'
+        - $ref: '#/components/parameters/PlaceholderId'
+        - name: contactId
+          in: query
+          required: false
+          description: ID of the contact to remove from the placeholder.
+          schema:
+            type: string
+        - name: email
+          in: query
+          required: false
+          description: Email of the contact to remove from the placeholder.
+          schema:
+            type: string
+            format: email
+      responses:
+        '200':
+          description: The placeholder with its remaining contacts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  placeholder:
+                    $ref: '#/components/schemas/RequestPlaceholder'
+              example:
+                placeholder:
+                  id: 8WcX2fLq9bTn4YzPd
+                  name: Signer 2
+                  contacts: []
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          description: Not found -- Unknown request or placeholder, or the contact is not in this placeholder.
+        '409':
+          $ref: '#/components/responses/PlaceholderLocked'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -3092,6 +3404,21 @@ paths:
         '503':
           $ref: '#/components/responses/503'
 components:
+  parameters:
+    PlaceholderRequestId:
+      name: requestId
+      in: path
+      required: true
+      description: The ID of the request.
+      schema:
+        type: string
+    PlaceholderId:
+      name: placeholderId
+      in: path
+      required: true
+      description: The `id` or the `name` (case-insensitive) of the placeholder. URL-encode names that contain spaces. If several placeholders have the same name, use the `id`.
+      schema:
+        type: string
   schemas:
     CreateContact:
       type: object
@@ -3788,6 +4115,174 @@ components:
           $ref: '#/components/schemas/Contact'
         branding:
           $ref: '#/components/schemas/Branding'
+        placeholders:
+          type: array
+          description: Contact placeholders of the campaign and the contacts filling them. Only present when the campaign has placeholders and a mapping was provided or already exists.
+          items:
+            $ref: '#/components/schemas/RequestPlaceholder'
+    Placeholder:
+      type: object
+      description: A contact placeholder defined in a campaign (e.g. "Signer 2"). It is used to assign elements or e-signature signers to contacts.
+      properties:
+        id:
+          type: string
+          description: Placeholder ID
+          example: 8WcX2fLq9bTn4YzPd
+        name:
+          type: string
+          description: Placeholder name
+          example: Signer 2
+    RequestPlaceholder:
+      type: object
+      description: A contact placeholder and the contacts that fill it on a request.
+      properties:
+        id:
+          type: string
+          description: Placeholder ID
+          example: 8WcX2fLq9bTn4YzPd
+        name:
+          type: string
+          description: Placeholder name
+          example: Signer 2
+        contacts:
+          type: array
+          description: Contacts filling this placeholder on the request.
+          items:
+            $ref: '#/components/schemas/PlaceholderContact'
+    PlaceholderContact:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Contact ID
+          example: WmTjsFknzHdmfs3Ra
+        email:
+          type: string
+          format: email
+          example: jo@acme.com
+        firstName:
+          type: string
+          example: Jo
+        lastName:
+          type: string
+          example: Smith
+    PlaceholderRefs:
+      description: One placeholder or several. Each placeholder is referenced by its `id` or by its `name` (case-insensitive).
+      oneOf:
+        - type: string
+          title: One placeholder
+          example: Signer 2
+        - type: array
+          title: Several placeholders
+          items:
+            type: string
+          example: [Signer 2, Witness]
+    PlaceholderContactEntry:
+      description: |
+        A contact to put in a placeholder. It can be the ID of an existing contact, an object with the `contactId` of an existing contact, or a contact object.
+        Contacts that are not yet on the request are added to it as contributors. A contact object whose email already exists reuses the existing contact.
+      oneOf:
+        - type: string
+          title: Contact Id
+          example: WmTjsFknzHdmfs3Ra
+        - type: object
+          title: Existing contact
+          required:
+            - contactId
+          properties:
+            contactId:
+              type: string
+              description: ID of an existing contact.
+        - type: object
+          title: Contact Object
+          properties:
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+            company:
+              type: string
+            phone:
+              type: string
+              description: Phone number in international format (e.g. +33612345678), no spaces.
+            tag:
+              type: array
+              items:
+                type: string
+            customFields:
+              $ref: '#/components/schemas/Custom'
+    ContributorEntry:
+      description: |
+        A contributor to add to the request: the ID of an existing contact, or a contact object.
+        Each entry can carry its own `placeholders` to fill (in addition to the top-level `placeholders` of the call).
+      oneOf:
+        - type: string
+          title: Contact Id
+        - type: object
+          title: Existing contact
+          required:
+            - contactId
+          properties:
+            contactId:
+              type: string
+              description: ID of an existing contact.
+            placeholders:
+              $ref: '#/components/schemas/PlaceholderRefs'
+        - type: object
+          title: Contact Object
+          properties:
+            email:
+              type: string
+              format: email
+            firstName:
+              type: string
+            lastName:
+              type: string
+            company:
+              type: string
+            phone:
+              type: string
+              description: Phone number in international format (e.g. +33612345678), no spaces.
+            tag:
+              type: array
+              items:
+                type: string
+            customFields:
+              $ref: '#/components/schemas/Custom'
+            placeholders:
+              $ref: '#/components/schemas/PlaceholderRefs'
+    PlaceholderContactsBody:
+      type: object
+      required:
+        - contacts
+      properties:
+        contacts:
+          type: array
+          description: |
+            Contacts to put in the placeholder (up to 10 per call). Each contact is the ID of an existing contact, a `{contactId}` object or a contact object.
+          items:
+            $ref: '#/components/schemas/PlaceholderContactEntry'
+    PlaceholderResult:
+      type: object
+      properties:
+        placeholder:
+          $ref: '#/components/schemas/RequestPlaceholder'
+        errors:
+          $ref: '#/components/schemas/PlaceholderContactErrors'
+    PlaceholderContactErrors:
+      type: array
+      description: Contacts that could not be added, with the reason.
+      items:
+        type: object
+        properties:
+          contact:
+            description: The contact entry as it was sent.
+          error:
+            type: string
+            example: Contact doesn't exist
     Branding:
       type: object
       properties:
@@ -3984,6 +4479,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Page'
+        placeholders:
+          type: array
+          description: Contact placeholders of the campaign and the contacts filling them on this request. Only present when the campaign has placeholders.
+          items:
+            $ref: '#/components/schemas/RequestPlaceholder'
     Message:
       type: object
       description: |
@@ -4067,6 +4567,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Page'
+        placeholders:
+          type: array
+          description: Contact placeholders defined in the campaign. Only present when the campaign has some.
+          items:
+            $ref: '#/components/schemas/Placeholder'
     Text:
       type: object
       properties:
@@ -4267,6 +4772,18 @@ components:
           type: string
           format: date-time
   responses:
+    PlaceholderLocked:
+      description: Conflict -- The placeholder is used by a signer whose e-signature envelope has already been created. It can no longer be changed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: integer
+                example: 409
+              message:
+                type: string
     '400':
       description: Bad Request -- Your request is invalid.
     '401':
