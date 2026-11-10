@@ -1719,12 +1719,15 @@ paths:
       operationId: export-request-pdf
       summary: Export request in PDF
       description: |
-        Generate a collated PDF for a given request and get a temporary download URL.
-        **Authentication:** Same as the rest of the API (API key with an empty username and the key as password, e.g. `Authorization: Basic <base64(:apiKey)>` or `?api_key=...`, or OAuth Bearer token). The authenticated user must have **requests-download** permission for the request.
-        **Default export (templateId omitted):** All uploaded documents for that request, in item order, plus the results of the forms that have been answered. Forms without any answer are skipped.
-        **Custom template (templateId set):** Export follows the template (documents, static pages, PDFs, forms, order, "do not include if form has no answers", etc.). Template IDs are shown in the app in "Manage your PDF exports" (list and in the template detail modal when editing).
-        **OCR text layer (removeOcr):** Scanned documents can carry an OCR text layer (the invisible text that makes them searchable). Set `removeOcr=true` to strip this layer from the exported PDF; the scanned documents will then no longer be searchable. If `removeOcr` is omitted, the export follows the "Remove the OCR text layer" setting of the template (the default export does not remove it).
-        The client should use the returned `url` with a simple GET (e.g. redirect or fetch) to download the PDF. The link is valid for 15 minutes; after that a new export must be requested.
+        This endpoint generates a single PDF for a request and returns a temporary URL to download it. The user must have the **requests-download** permission on the request.
+
+        **Default export (no `templateId`):** All the uploaded documents of the request, in item order, followed by the answers of the forms that have been filled in. Forms without any answer are skipped.
+
+        **Custom export (`templateId`):** The export follows your template: documents, static pages, PDFs, forms, order, etc. Template IDs are listed in the app under "Manage your PDF exports" and in the detail of each template.
+
+        **OCR text layer (`removeOcr`):** Set `removeOcr` to `true` to remove the OCR text layer from scanned documents. The documents will no longer be searchable. If omitted, the template setting is used (the default export keeps the text layer).
+
+        **Download:** Use the returned `url` with a simple GET request to download the PDF. The link is valid for 15 minutes, after that you need to request a new export.
       parameters:
         - name: requestId
           in: path
